@@ -23,4 +23,4 @@ talks/YYYY-MM-<topic>/
 
 | เดือน | หัวข้อ | โฟลเดอร์ |
 | --- | --- | --- |
-| 2026-09 | ระดับการใช้ AI (chat → prompt → context → agent harness) | [talks/2026-09-ai-usage-levels](talks/2026-09-ai-usage-levels) |
+| 2026-09 | Level Up How You Use AI (chat → prompt → context → agent harness) | [talks/2026-09-ai-usage-levels](talks/2026-09-ai-usage-levels) |
