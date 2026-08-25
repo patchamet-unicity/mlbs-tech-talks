@@ -6,6 +6,9 @@ talks/YYYY-MM-<topic>/
 ├── assets/     # รูป ไฟล์ประกอบ
 ├── NOTES.md    # เนื้อหา script ลิงก์อ้างอิง (content ของ talk)
 └── HANDOFF.md  # working state — ทำถึงไหน ตัดสินใจอะไรไปแล้ว next action
+
+talks/assets/   # shared assets ใช้ข้าม talk (ไม่ผูกกับ talk ไหน)
+└── characters/ # ตัวละครคน+หุ่น AI — ต้นทางคือ build-sprites.py (2026-08-25)
 ```
 
 - ตั้งชื่อ folder talk เป็น `YYYY-MM-<topic-slug>` (แค่เดือนพอ ไม่ต้องระดับวัน

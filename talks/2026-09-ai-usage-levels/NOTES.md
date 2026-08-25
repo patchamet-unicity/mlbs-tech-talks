@@ -70,9 +70,12 @@ TechTalks — กันยายน 2026
 
 | ไฟล์ | คืออะไร |
 | --- | --- |
-| `slides/sprites/build-sprites.py` | **ต้นทาง** แก้ทรงตัวละครที่นี่ที่เดียว |
-| `slides/characters.js` | ผลลัพธ์ที่ generate ออกมา สไลด์เรียกใช้ตัวนี้ |
-| `slides/sprites/preview.html` | หน้าไว้เปิดดูตัวละคร (generate ออกมาเหมือนกัน) |
+| `../assets/characters/build-sprites.py` | **ต้นทาง** แก้ทรงตัวละครที่นี่ที่เดียว |
+| `../assets/characters/characters.js` | ผลลัพธ์ที่ generate ออกมา สไลด์เรียกใช้ตัวนี้ |
+| `../assets/characters/preview.html` | หน้าไว้เปิดดูตัวละคร (generate ออกมาเหมือนกัน) |
+
+(ย้ายเป็น shared asset ที่ `talks/assets/characters/` แล้ว — 2026-08-25
+เผื่อใช้ซ้ำใน talk อื่น รายละเอียดเต็มอยู่ใน README ของโฟลเดอร์นั้น)
 
 วิธีทำงาน: วาดเป็นกริดครึ่งซ้าย 20 คอลัมน์ → mirror เป็น 40 → เติมเส้นขอบ
 อัตโนมัติ (ช่องว่างที่ติดตัวละครกลายเป็นเส้นขอบ) ความละเอียดสุดท้าย 40×51
@@ -80,7 +83,7 @@ TechTalks — กันยายน 2026
 เรียกใช้ในสไลด์:
 
 ```html
-<script src="characters.js"></script>
+<script src="../../assets/characters/characters.js"></script>
 <div data-char="human"></div>
 <div data-char="robot"></div>
 ```

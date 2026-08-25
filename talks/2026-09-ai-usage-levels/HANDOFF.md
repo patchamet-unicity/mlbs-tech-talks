@@ -18,7 +18,7 @@
 - เพิ่ม token ใหม่ใน theme.css: `--denim` / `--denim-dark` / `--denim-light`
   (ธีม Johto ไม่มีน้ำเงินเลย สามตัวนี้มีไว้สำหรับกางเกงตัวละครเท่านั้น)
 - **ตัวละครเป็น draft แล้ว ยังไม่ล็อก** — รายละเอียดทั้งหมดอยู่ใน NOTES.md
-  หัวข้อ "ตัวละคร" อ่านที่นั่น แก้ทรงตัวละครที่ `slides/sprites/build-sprites.py`
+  หัวข้อ "ตัวละคร" อ่านที่นั่น แก้ทรงตัวละครที่ `talks/assets/characters/build-sprites.py` (ย้ายเป็น shared asset แล้ว)
   ที่เดียว แล้วรัน `python build-sprites.py` (อย่าแก้ characters.js ตรงๆ)
 - ยังไม่ได้ทำ slides จริงสักหน้า
 - หน้า swatch ไว้ดูสี/ก็อป hex: https://claude.ai/code/artifact/d8515ab2-a741-4ae7-b02e-ee6a0ef65aae

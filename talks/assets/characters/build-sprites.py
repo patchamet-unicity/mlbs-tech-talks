@@ -211,7 +211,7 @@ js += [
     '})();',
     '',
 ]
-io.open(os.path.join(HERE, '..', 'characters.js'), 'w', encoding='utf-8').write('\n'.join(js))
+io.open(os.path.join(HERE, 'characters.js'), 'w', encoding='utf-8').write('\n'.join(js))
 
 PREVIEW = u"""<!doctype html>
 <html lang="th"><head><meta charset="utf-8">
