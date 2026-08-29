@@ -13,10 +13,12 @@
    ต่างจากสไลด์ 1–2 ตรงที่ "ข้อความอ่านออก" เพราะเนื้อบทคือสาระ
    ไม่ใช่รูปทรง — คนดูต้องอ่านตามได้ว่า AI เดาผิดกี่รอบ
 
-   1 beat = 1 ข้อความ (ไม่ใช่ 1 คู่สนทนา) รวม 16 beat
+   1 beat = 1 ข้อความ (ไม่ใช่ 1 คู่สนทนา) รวม 17 beat
      beat 1..10  ไล่เดา 4 รอบ แล้ว AI ขอ context เอง  (จุดเปลี่ยนที่ข้อความ 10)
-     beat 11..16 พอมี log + โค้ด ก็จบงานได้ใน 3 คู่สนทนา
-   จบ beat 16 → บรรทัดสรุปโผล่ใต้กล่อง แล้วกดอีกทีถึงไปสไลด์ถัดไป
+     beat 11..17 พอมี log + โค้ด ก็จบงานได้ใน 3 คู่สนทนา แล้วปิดท้ายด้วย 🙂👌
+
+   ใต้กล่องแชทมีฉากวนไม่รู้จบ ไม่ผูกกับ beat — คนเรียกหุ่นออกมาจากห้องทำงาน
+   คุยกัน แล้วหุ่นกลับเข้าห้อง 3 รอบ รอบสุดท้ายคนขึ้น ✅ แล้ววนใหม่
 
    กล่องแชทสูงคงที่ ข้อความกองจากล่างขึ้นบน (.feed ยึด bottom)
    ล้นแล้วโดน overflow:hidden ตัด + mask ไล่จางที่ขอบบน
@@ -29,8 +31,8 @@
    micro loop เดียว: จุดสามจุด "AI กำลังพิมพ์" โผล่ทุกครั้งที่ตาเป็นของ AI
    --accent ใช้จุดเดียว = ป้ายจุดเปลี่ยนที่ข้อความ 10
 
-   ปุ่มควบคุมชุดเดียวกับสไลด์ 1–2 แต่เปลี่ยน pips เป็นเลข n/16
-   เพราะ 16 จุดยาวเป็นแถบรกจอ
+   ปุ่มควบคุมชุดเดียวกับสไลด์ 1–2 แต่เปลี่ยน pips เป็นเลข n/17
+   เพราะจุดเยอะขนาดนั้นยาวเป็นแถบรกจอ
    ============================================================ */
 
 html, body { height: 100%; overflow: hidden; }
@@ -80,7 +82,7 @@ body {
   left: 190px;
   top: 100px;
   width: 900px;
-  height: 496px;
+  height: 440px;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -174,6 +176,7 @@ body {
   color: var(--ink);
 }
 .msg.you .bub { background: var(--frame); }   /* ฝั่งเรา = ครีมเหลือง แยกด้วยสี ไม่ต้องพึ่งตำแหน่งอย่างเดียว */
+.msg.emo .bub { padding: 6px 18px 10px; font-size: 34px; line-height: 1.2; }
 .bub p { margin: 0; }
 .bub p + p { margin-top: 5px; }
 
@@ -243,25 +246,134 @@ body {
 .dots i:nth-child(3) { animation-delay: .6s; }
 @keyframes dotPulse { 0%, 60% { opacity: .85 } 61%, 100% { opacity: .25 } }
 
-/* ---- บรรทัดสรุปใต้กล่อง ---- */
-.sum {
+/* ============================================================
+   ฉากล่างกล่องแชท y 540..720 — วนไม่รู้จบ ไม่ผูกกับ beat
+   หุ่นอยู่ห้องทำงานฝั่งซ้าย คนยืนรอฝั่งขวา
+   คนเรียก → หุ่นออกจากห้องมาหา → คุยกัน → หุ่นกลับเข้าห้อง
+   3 รอบ รอบสุดท้ายหุ่นตอบแล้วคนขึ้น ✅ แล้ววนใหม่
+   ============================================================ */
+.scene {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 180px;
+}
+.scene .floor {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 30px;
+  height: 3px;
+  background: var(--ash);
+  opacity: .5;
+}
+
+/* ---- ห้องทำงานของหุ่น ---- */
+.booth {
+  position: absolute;
+  left: 140px;
+  bottom: 30px;
+  width: 172px;
+  height: 120px;
+  box-sizing: border-box;
+  background: var(--ground-light);
+  border: 4px solid var(--ink);
+}
+.booth .sign {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  height: 22px;
+  padding: 0 9px;
+  background: var(--sign);
+  border-bottom: 4px solid var(--ink);
+}
+.booth .sign i { width: 7px; height: 7px; background: var(--ink); opacity: .5; }
+.booth .room { position: relative; height: 86px; }
+.booth .mon {
+  position: absolute;
+  left: 13px;
+  top: 12px;
+  width: 58px;
+  height: 42px;
+  box-sizing: border-box;
+  padding: 7px 6px;
+  background: var(--ground);
+  border: 3px solid var(--ink);
+}
+.booth .mon span { display: block; height: 4px; margin-bottom: 5px; background: var(--ink-soft); opacity: .5; }
+.booth .mon span:nth-child(1) { width: 38px; }
+.booth .mon span:nth-child(2) { width: 24px; }
+.booth .mon span:nth-child(3) { width: 31px; margin-bottom: 0; }
+.booth .desk {
+  position: absolute;
+  left: 7px;
+  bottom: 12px;
+  width: 70px;
+  height: 5px;
+  background: var(--ink);
+  opacity: .75;
+}
+/* ช่องประตู — พื้นสีเดียวกับพื้นสไลด์ = ช่องโหว่ หุ่นเดินเข้าไปแล้วหายลับ */
+.booth .door {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 54px;
+  height: 78px;
+  box-sizing: border-box;
+  background: var(--ground);
+  border-left: 4px solid var(--ink);
+  border-top: 4px solid var(--ink);
+}
+
+/* ---- ตัวละคร 30% ของสไลด์ 1 ---- */
+.pawn {
+  position: absolute;
+  --char-size: 60px;
+  bottom: 30px;
+  left: 0;
+  transform: translateX(var(--x, 0));
+  opacity: 1;
+  transition: opacity .22s linear;
+}
+.pawn .char { height: var(--char-size); }
+.pawn.is-hidden { opacity: 0; }
+.pawn-bot { transition: transform var(--walk, 2s) linear, opacity .22s linear; }
+
+/* ---- บอลลูนเหนือหัว ---- */
+.say {
   position: absolute;
   left: 50%;
-  bottom: 46px;
-  transform: translateX(-50%);
-  font-family: var(--font-body);
-  font-weight: 500;
-  font-size: 22px;
-  letter-spacing: .01em;
-  color: var(--ink-soft);
+  bottom: calc(var(--char-size) + 9px);
+  transform: translateX(-50%) scale(.7);
+  padding: 4px 10px 5px;
+  background: var(--ground-light);
+  border: 3px solid var(--ink);
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 1.2;
+  color: var(--ink);
   white-space: nowrap;
   opacity: 0;
+  transition: opacity .16s ease-out, transform .16s cubic-bezier(.16, 1, .3, 1);
 }
-.sum.is-on { animation: sumIn .45s cubic-bezier(.16, 1, .3, 1) both; }
-@keyframes sumIn {
-  from { opacity: 0; transform: translate(-50%, 10px) }
-  to   { opacity: 1; transform: translate(-50%, 0) }
+.say::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -12px;
+  margin-left: -5px;
+  width: 9px;
+  height: 9px;
+  background: var(--ground-light);
+  border-right: 3px solid var(--ink);
+  border-bottom: 3px solid var(--ink);
 }
+.say.is-on { opacity: 1; transform: translateX(-50%) scale(1); }
+.say.is-emo { font-family: var(--font-body); font-size: 19px; padding: 2px 10px 4px; }
 
 /* ---- ตัวบอกว่ารอคลิก ---- */
 .wait {
@@ -345,7 +457,7 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .msg { transition: none !important; }
   .dots i, .mark i { animation: none; }
-  .sum.is-on { animation: none; opacity: 1; transform: translateX(-50%); }
+  .pawn, .pawn-bot, .say { transition: none; }
   .stage.is-waiting .wait { animation: none; opacity: 1; }
   .blink.is-out { animation: none; opacity: 1; }
 }
@@ -361,14 +473,32 @@ body {
     <div class="viewport"><div class="feed" id="feed"></div></div>
   </div>
 
-  <div class="sum" id="sum">16 ข้อความ · 4 รอบแรกคือการเดา</div>
+  <div class="scene" id="scene">
+    <div class="floor"></div>
+    <div class="booth">
+      <div class="sign"><i></i><i></i><i></i></div>
+      <div class="room">
+        <div class="mon"><span></span><span></span><span></span></div>
+        <div class="desk"></div>
+        <div class="door"></div>
+      </div>
+    </div>
+    <div class="pawn pawn-bot" id="bot">
+      <div class="say" id="bot-say"></div>
+      <div class="sprite" data-char="robot-right"></div>
+    </div>
+    <div class="pawn pawn-you" id="guy">
+      <div class="say" id="guy-say"></div>
+      <div class="sprite" data-char="human"></div>
+    </div>
+  </div>
 
   <div class="wait">&#9660;</div>
 
   <div class="controls" id="controls">
     <button type="button" id="btn-prev"  title="ถอยหลังหนึ่งข้อความ (←)">&#9664;</button>
     <button type="button" id="btn-next"  title="ข้อความถัดไป (→ / Space)">&#9654;</button>
-    <div class="count" id="count" title="ข้อความที่เท่าไหร่">0/16</div>
+    <div class="count" id="count" title="ข้อความที่เท่าไหร่">0/17</div>
     <button type="button" id="btn-reset" title="เริ่มสไลด์นี้ใหม่ (R)">&#8635;</button>
     <button type="button" id="btn-auto"  title="เดินหน้าเองอัตโนมัติ" aria-pressed="false">AUTO</button>
   </div>
@@ -376,6 +506,7 @@ body {
 
 <div class="blink" id="blink"></div>
 
+<script src="../../assets/characters/characters.js"></script>
 <script>
 (function () {
   "use strict";
@@ -421,7 +552,9 @@ body {
 
     { who: "you", p: ["แก้แล้ว ลูกค้าสร้าง order ได้แล้ว ขอบคุณมากครับ"] },
     { who: "ai",  p: ["ยินดีครับ เคสนี้จะเกิดกับลูกค้าทุกรายที่ยังไม่เคยตั้งวงเงิน",
-                      "ลองไล่เช็ครายอื่นด้วยนะครับ"] }
+                      "ลองไล่เช็ครายอื่นด้วยนะครับ"] },
+
+    { who: "you", p: ["🙂👌"], emo: true }
   ];
 
   var BEATS = MSGS.length;
@@ -435,7 +568,6 @@ body {
 
   var stage  = document.getElementById("stage");
   var feed   = document.getElementById("feed");
-  var sumEl  = document.getElementById("sum");
   var blink  = document.getElementById("blink");
   var embed  = window.parent !== window;
   var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -521,6 +653,7 @@ body {
                 '<div class="bub">' +
                 m.p.map(function (t) { return "<p>" + t + "</p>"; }).join("") +
                 '</div>';
+    if (m.emo)  el.classList.add("emo");
     if (m.shot) inner += SHOT;
     if (m.log)  inner += '<div class="log">' + esc(m.log) + '</div>';
     if (m.mark) inner += '<div class="mark"><i></i>' + m.mark + '</div>';
@@ -579,7 +712,6 @@ body {
     stage.classList.toggle("is-waiting", beat > 0 && !leaving);
     document.getElementById("btn-prev").disabled = (beat <= 1 && !embed && !PREV);
     document.getElementById("btn-next").disabled = leaving;
-    sumEl.classList.toggle("is-on", beat === BEATS && reduce);
   }
 
   function armAuto() { if (auto && !leaving) at(AUTO_HOLD[beat], advance); }
@@ -590,8 +722,6 @@ body {
     beat = n;
     if (step && !reduce) push(); else rebuild();
     paint();
-    if (beat === BEATS) at(reduce ? 0 : 950, function () { sumEl.classList.add("is-on"); });
-    else sumEl.classList.remove("is-on");
     armAuto();
   }
 
@@ -657,6 +787,101 @@ body {
       reset();
     }
   });
+
+  /* ============================================================
+     ฉากล่าง — ลูปของตัวเอง ไม่ยุ่งกับ beat เลย
+     ใช้ตัวจับเวลาคนละชุด (sceneT) จะได้ไม่โดน clearTimers() ของ beat ล้าง
+     ============================================================ */
+  var BOT_HOME = 262;                      /* กลางช่องประตูของห้องทำงาน */
+  var BOT_TALK = 880;                      /* จุดที่หุ่นเดินมาคุยกับคน */
+  var GUY_X    = 980;
+
+  var bot    = document.getElementById("bot");
+  var guy    = document.getElementById("guy");
+  var botSay = document.getElementById("bot-say");
+  var guySay = document.getElementById("guy-say");
+
+  /* คำในบอลลูนเป็นสัญลักษณ์ล้วน ตั้งใจให้อ่านไม่ออก — สื่อแค่ว่ากำลังคุยกัน */
+  var GUY_LINES = ["▪▪▪", "?", "!", "▪▪", "…", "!?", "▪?"];
+  var BOT_LINES = ["0101", "♪", "▪▪▪", "!", "10▪", "…", "✓"];
+  function pick(a) { return a[Math.floor(Math.random() * a.length)]; }
+
+  var sceneT = [];
+  function sat(ms, fn) { sceneT.push(setTimeout(fn, ms)); }
+
+  function face(pawn, name) {
+    var sp = pawn.querySelector(".sprite");
+    if (sp.getAttribute("data-char") === name) return;
+    sp.setAttribute("data-char", name);
+    if (window.Characters) window.Characters.hydrate(pawn);
+  }
+  function say(el, text, emo) {
+    el.textContent = text;
+    el.classList.toggle("is-emo", !!emo);
+    el.classList.add("is-on");
+  }
+  function hush(el) { el.classList.remove("is-on"); }
+
+  function move(x, ms) {
+    bot.style.setProperty("--walk", ms + "ms");
+    bot.offsetHeight;                      /* บังคับ reflow ให้ duration ใหม่มีผลก่อนย้าย */
+    bot.style.setProperty("--x", x + "px");
+  }
+
+  function scene() {
+    var t = 0;
+    function step(ms, fn) { t += ms; sat(t, fn); }
+
+    for (var r = 0; r < 3; r++) (function (last) {
+      /* คนเรียก */
+      step(r === 0 ? 500 : 900, function () {
+        face(guy, "human-left");
+        say(guySay, pick(GUY_LINES));
+      });
+      /* หุ่นออกจากห้องเดินมาหา */
+      step(800, function () {
+        hush(guySay);
+        bot.classList.remove("is-hidden");
+        face(bot, "robot-right");
+        move(BOT_TALK, 2100);
+      });
+      /* ถึงแล้วเริ่มคุย */
+      step(2300, function () { say(botSay, pick(BOT_LINES)); });
+
+      if (!last) {
+        step(900, function () { hush(botSay); say(guySay, pick(GUY_LINES)); });
+        step(900, function () { hush(guySay); say(botSay, pick(BOT_LINES)); });
+        step(900, function () { hush(botSay); });
+      } else {
+        /* รอบสุดท้าย: ตอบเสร็จ หยุดแป๊บ แล้วคนขึ้น ✅ */
+        step(1000, function () { hush(botSay); });
+        step(900,  function () { say(guySay, "✅", true); });
+        step(1500, function () { hush(guySay); });
+      }
+
+      /* หุ่นกลับเข้าห้อง คนหันหน้าตรงรอ */
+      step(300, function () {
+        face(bot, "robot-left");
+        face(guy, "human");
+        move(BOT_HOME, 2100);
+      });
+      step(2100, function () { bot.classList.add("is-hidden"); });
+    })(r === 2);
+
+    step(1200, scene);                     /* วนใหม่ไม่รู้จบ */
+  }
+
+  guy.style.setProperty("--x", GUY_X + "px");
+  bot.style.setProperty("--x", BOT_HOME + "px");
+
+  if (reduce) {
+    bot.style.setProperty("--x", BOT_TALK + "px");
+    face(bot, "robot-right");
+    face(guy, "human-left");
+  } else {
+    bot.classList.add("is-hidden");
+    sat(300, scene);
+  }
 
   paint();
   at(220, function () { setBeat(1); });
