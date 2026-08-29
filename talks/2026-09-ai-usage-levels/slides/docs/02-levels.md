@@ -140,7 +140,7 @@ var ICONS = {
 ## ค่าที่แก้บ่อย
 
 ```js
-var NEXT = "03-examples.html";   // ยังไม่มีไฟล์นี้ — กด ▶ ที่ beat 4 จะ 404
+var NEXT = "03-chat.html";
 var PREV = "01-title.html";
 
 var STEP_W   = 210;   // ความกว้างเสา
@@ -165,6 +165,6 @@ var AUTO_HOLD = [0, 2600, 2600, 2600, 6000];
 
 ## สิ่งที่ยังไม่ได้ทำ
 
-- `NEXT` ชี้ไป `03-examples.html` ซึ่งยังไม่มีไฟล์
+- `NEXT` ชี้ไป `03-chat.html` (มีไฟล์แล้ว)
 - ชุดไอคอนกลาง (`talks/assets/icons/`) ยังไม่ได้ทำ — ตอนนี้ `ICONS` ฝังอยู่ในสไลด์นี้
   ถ้าช่วง 7 (agent harness เต็มๆ) ต้องใช้ไอคอนซ้ำ ค่อยย้ายออกมาเป็น asset กลาง
