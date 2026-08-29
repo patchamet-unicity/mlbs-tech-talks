@@ -269,68 +269,86 @@ body {
   opacity: .5;
 }
 
-/* ---- ห้องทำงานของหุ่น ---- */
-.booth {
+/* ---- ตู้ rack ของหุ่น — กว้างครึ่งเดียวของบ้านเดิม สูงเท่าเดิม ----
+   ตู้อยู่ z-index สูงกว่าตัวละคร หุ่นเลย "เลื่อนหายเข้าไปหลังตู้" จริงๆ
+   ไม่ใช่แค่จางหาย (ยังคง is-hidden ไว้เป็นตัวปิดท้ายกันหลุด) */
+.rack {
   position: absolute;
-  left: 328px;
+  left: 330px;
   bottom: 30px;
-  width: 172px;
+  width: 86px;
   height: 120px;
   box-sizing: border-box;
   background: var(--ground-light);
   border: 4px solid var(--ink);
+  overflow: hidden;
+  z-index: 2;
 }
-.booth .sign {
+.rack .cap {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 5px;
-  height: 22px;
-  padding: 0 9px;
+  height: 16px;
+  padding-right: 7px;
   background: var(--sign);
   border-bottom: 4px solid var(--ink);
 }
-.booth .sign i { width: 7px; height: 7px; background: var(--ink); opacity: .5; }
-.booth .room { position: relative; height: 86px; }
-.booth .mon {
-  position: absolute;
-  left: 13px;
-  top: 12px;
-  width: 58px;
-  height: 42px;
+.rack .cap i { width: 5px; height: 5px; background: var(--ink); opacity: .45; }
+
+.bays { padding: 7px 7px 0; }
+.bay {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  height: 16px;
+  margin-bottom: 5px;
+  padding: 0 5px;
   box-sizing: border-box;
-  padding: 7px 6px;
   background: var(--ground);
-  border: 3px solid var(--ink);
+  border: 2px solid var(--ink);
 }
-.booth .mon span { display: block; height: 4px; margin-bottom: 5px; background: var(--ink-soft); opacity: .5; }
-.booth .mon span:nth-child(1) { width: 38px; }
-.booth .mon span:nth-child(2) { width: 24px; }
-.booth .mon span:nth-child(3) { width: 31px; margin-bottom: 0; }
-.booth .desk {
-  position: absolute;
-  left: 7px;
-  bottom: 12px;
-  width: 70px;
+.bay .led {
+  width: 5px;
   height: 5px;
-  background: var(--ink);
-  opacity: .75;
+  background: var(--grass-deep);
+  opacity: .35;
+  animation: ledIdle 3.4s steps(1, end) infinite;
 }
-/* ช่องประตู — พื้นสีเดียวกับพื้นสไลด์ = ช่องโหว่ หุ่นเดินเข้าไปแล้วหายลับ */
-.booth .door {
+.bay:nth-child(2) .led { animation-delay: .9s; }
+.bay:nth-child(3) .led { animation-delay: 1.8s; }
+.bay:nth-child(4) .led { animation-delay: 2.5s; background: var(--accent); }
+.bay .vent { flex: 1; height: 4px; background: var(--ink); opacity: .22; }
+@keyframes ledIdle { 0%, 12% { opacity: 1 } 13%, 100% { opacity: .3 } }
+
+/* micro animation ตอนหุ่นเข้าไปอยู่ในตู้ — ไฟกะพริบถี่ + แถบสแกนไล่ลงมา */
+.rack.is-busy .bay .led { animation: ledBusy .48s steps(1, end) infinite; }
+.rack.is-busy .bay:nth-child(2) .led { animation-delay: .12s; }
+.rack.is-busy .bay:nth-child(3) .led { animation-delay: .3s; }
+.rack.is-busy .bay:nth-child(4) .led { animation-delay: .2s; }
+@keyframes ledBusy { 0%, 49% { opacity: 1 } 50%, 100% { opacity: .25 } }
+
+.rack .scan {
   position: absolute;
+  left: 0;
   right: 0;
-  bottom: 0;
-  width: 54px;
-  height: 78px;
-  box-sizing: border-box;
-  background: var(--ground);
-  border-left: 4px solid var(--ink);
-  border-top: 4px solid var(--ink);
+  top: 0;
+  height: 4px;
+  background: var(--grass-deep);
+  opacity: 0;
+}
+.rack.is-busy .scan { animation: rackScan 1.5s linear infinite; }
+@keyframes rackScan {
+  0%   { transform: translateY(16px); opacity: 0 }
+  12%  { opacity: .75 }
+  88%  { opacity: .75 }
+  100% { transform: translateY(112px); opacity: 0 }
 }
 
 /* ---- ตัวละคร 30% ของสไลด์ 1 ---- */
 .pawn {
   position: absolute;
+  z-index: 1;
   --char-size: 60px;
   bottom: 30px;
   left: 0;
@@ -458,6 +476,7 @@ body {
   .msg { transition: none !important; }
   .dots i, .mark i { animation: none; }
   .pawn, .pawn-bot, .say { transition: none; }
+  .bay .led, .rack .scan { animation: none; }
   .stage.is-waiting .wait { animation: none; opacity: 1; }
   .blink.is-out { animation: none; opacity: 1; }
 }
@@ -475,13 +494,15 @@ body {
 
   <div class="scene" id="scene">
     <div class="floor"></div>
-    <div class="booth">
-      <div class="sign"><i></i><i></i><i></i></div>
-      <div class="room">
-        <div class="mon"><span></span><span></span><span></span></div>
-        <div class="desk"></div>
-        <div class="door"></div>
+    <div class="rack" id="rack">
+      <div class="cap"><i></i><i></i></div>
+      <div class="bays">
+        <div class="bay"><span class="led"></span><span class="vent"></span></div>
+        <div class="bay"><span class="led"></span><span class="vent"></span></div>
+        <div class="bay"><span class="led"></span><span class="vent"></span></div>
+        <div class="bay"><span class="led"></span><span class="vent"></span></div>
       </div>
+      <div class="scan"></div>
     </div>
     <div class="pawn pawn-bot" id="bot">
       <div class="say" id="bot-say"></div>
@@ -792,16 +813,17 @@ body {
      ฉากล่าง — ลูปของตัวเอง ไม่ยุ่งกับ beat เลย
      ใช้ตัวจับเวลาคนละชุด (sceneT) จะได้ไม่โดน clearTimers() ของ beat ล้าง
      ============================================================ */
-  /* ทั้งฉาก (ห้องทำงาน→คน) กินพื้นที่ x 328..951 กึ่งกลาง 639.5 = กลางเวทีพอดี
+  /* ทั้งฉาก (ตู้ rack→คน) กินพื้นที่ x 330..950 กึ่งกลาง 640 = กลางเวทีพอดี
      ขยับค่าไหนต้องเลื่อนทั้งชุดพร้อมกัน ไม่งั้นฉากเบ้ไปข้างใดข้างหนึ่ง */
-  var BOT_HOME = 450;                      /* กลางช่องประตูของห้องทำงาน */
+  var BOT_HOME = 350;                      /* กลางตู้ rack — หุ่นเลื่อนเข้าไปหลังตู้ */
   var BOT_TALK = 804;                      /* จุดที่หุ่นเดินมาคุยกับคน */
-  var GUY_X    = 904;                      /* คนยืนนิ่ง ขอบขวาสุดของฉาก = 951 */
+  var GUY_X    = 903;                      /* คนยืนนิ่ง ขอบขวาสุดของฉาก = 950 */
 
   var bot    = document.getElementById("bot");
   var guy    = document.getElementById("guy");
   var botSay = document.getElementById("bot-say");
   var guySay = document.getElementById("guy-say");
+  var rack   = document.getElementById("rack");
 
   /* คำในบอลลูนเป็นสัญลักษณ์ล้วน ตั้งใจให้อ่านไม่ออก — สื่อแค่ว่ากำลังคุยกัน */
   var GUY_LINES = ["▪▪▪", "?", "!", "▪▪", "…", "!?", "▪?"];
@@ -844,6 +866,7 @@ body {
       step(800, function () {
         hush(guySay);
         bot.classList.remove("is-hidden");
+        rack.classList.remove("is-busy");   /* หุ่นออกมาแล้ว ตู้กลับไปนิ่ง */
         face(bot, "robot-right");
         move(BOT_TALK, 2100);
       });
@@ -867,7 +890,10 @@ body {
         face(guy, "human");
         move(BOT_HOME, 2100);
       });
-      step(2100, function () { bot.classList.add("is-hidden"); });
+      step(2100, function () {
+        bot.classList.add("is-hidden");
+        rack.classList.add("is-busy");    /* หุ่นเข้าไปทำงานในตู้ ไฟกะพริบถี่ + แถบสแกน */
+      });
     })(r === 2);
 
     step(1200, scene);                     /* วนใหม่ไม่รู้จบ */
@@ -882,6 +908,7 @@ body {
     face(guy, "human-left");
   } else {
     bot.classList.add("is-hidden");
+    rack.classList.add("is-busy");
     sat(300, scene);
   }
 
