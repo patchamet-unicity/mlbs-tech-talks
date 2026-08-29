@@ -7,6 +7,7 @@
 | --- | --- |
 | [01-title.md](01-title.md) | `../01-title.html` — หน้าจอเปิดเกมสไตล์ GBC |
 | [02-levels.md](02-levels.md) | `../02-levels.html` — บันได 4 ระดับ |
+| [03-chat.md](03-chat.md) | `../03-chat.html` — บทสนทนา IT support ระดับ 01 Chat |
 
 ## สิ่งที่ใช้ร่วมกันทุกสไลด์ (อ่านก่อน)
 

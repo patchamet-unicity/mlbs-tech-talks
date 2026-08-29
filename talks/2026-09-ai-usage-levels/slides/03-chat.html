@@ -1,0 +1,607 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ระดับ 01 — Chat</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="theme.css">
+<style>
+/* ============================================================
+   สไลด์ 3 — "ระดับ 01 Chat" เล่าด้วยบทสนทนาจริง
+
+   ต่างจากสไลด์ 1–2 ตรงที่ "ข้อความอ่านออก" เพราะเนื้อบทคือสาระ
+   ไม่ใช่รูปทรง — คนดูต้องอ่านตามได้ว่า AI เดาผิดกี่รอบ
+
+   1 beat = 1 ข้อความ (ไม่ใช่ 1 คู่สนทนา) รวม 16 beat
+     beat 1..10  ไล่เดา 4 รอบ แล้ว AI ขอ context เอง  (จุดเปลี่ยนที่ข้อความ 10)
+     beat 11..16 พอมี log + โค้ด ก็จบงานได้ใน 3 คู่สนทนา
+   จบ beat 16 → บรรทัดสรุปโผล่ใต้กล่อง แล้วกดอีกทีถึงไปสไลด์ถัดไป
+
+   กล่องแชทสูงคงที่ ข้อความกองจากล่างขึ้นบน (.feed ยึด bottom)
+   ล้นแล้วโดน overflow:hidden ตัด + mask ไล่จางที่ขอบบน
+   ข้อความเก่าเลื่อนขึ้นหายไปเรื่อยๆ เห็นแต่ที่เพิ่งคุยกัน — เหมือนแชทจริง
+
+   วิธีทำให้ "เลื่อนขึ้น" ลื่น: ข้อความใหม่เกิดมาพร้อม margin-top ติดลบ
+   เท่าความสูงตัวเอง (กองไม่ขยับ) แล้ว transition กลับเป็น 0
+   → ทั้งกองถูกดันขึ้นพร้อมกัน ดูเป็นการ scroll
+
+   micro loop เดียว: จุดสามจุด "AI กำลังพิมพ์" โผล่ทุกครั้งที่ตาเป็นของ AI
+   --accent ใช้จุดเดียว = ป้ายจุดเปลี่ยนที่ข้อความ 10
+
+   ปุ่มควบคุมชุดเดียวกับสไลด์ 1–2 แต่เปลี่ยน pips เป็นเลข n/16
+   เพราะ 16 จุดยาวเป็นแถบรกจอ
+   ============================================================ */
+
+html, body { height: 100%; overflow: hidden; }
+body {
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  user-select: none;
+}
+
+.stage {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  width: 1280px;
+  height: 720px;
+  transform: translate(-50%, -50%) scale(var(--stage-scale, 1));
+  transform-origin: center center;
+  overflow: hidden;
+  background: var(--ground);
+}
+
+/* ---- หัวสไลด์ ---- */
+.head {
+  position: absolute;
+  left: 50%;
+  top: 22px;
+  transform: translateX(-50%);
+  padding: 10px 36px;
+  background: var(--ground-light);
+  border: 4px solid var(--ink);
+  box-shadow: inset 0 0 0 3px var(--ground-light), inset 0 0 0 4px var(--ash);
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 28px;
+  letter-spacing: .02em;
+  line-height: 1.2;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+/* ============================================================
+   หน้าต่างแชท
+   ============================================================ */
+.chatbox {
+  position: absolute;
+  left: 190px;
+  top: 100px;
+  width: 900px;
+  height: 496px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  background: var(--ground-light);
+  border: 4px solid var(--ink);
+}
+
+.chatbox .bar {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 44px;
+  padding: 0 16px;
+  box-sizing: border-box;
+  background: var(--sign);
+  border-bottom: 4px solid var(--ink);
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 17px;
+  color: var(--ink);
+}
+.chatbox .bar b {
+  width: 11px;
+  height: 11px;
+  background: var(--ink);
+  opacity: .55;
+}
+
+/* ช่องมองเห็น — ตัดข้อความที่ล้นออกด้านบน แล้วไล่จางไม่ให้ตัดกึกกัก */
+.viewport {
+  position: relative;
+  flex: 1 1 auto;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(to bottom,
+                       rgba(0,0,0,0) 0, rgba(0,0,0,.12) 22px, #000 92px);
+          mask-image: linear-gradient(to bottom,
+                       rgba(0,0,0,0) 0, rgba(0,0,0,.12) 22px, #000 92px);
+}
+
+/* กองจากล่างขึ้นบน — ข้อความใหม่อยู่ล่างสุดเสมอ */
+.feed {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 20px 24px 18px;
+  box-sizing: border-box;
+}
+
+/* ---- ข้อความ ---- */
+.msg { display: flex; padding-top: 15px; }
+.msg.you { justify-content: flex-end; }
+
+.msg .col { display: flex; flex-direction: column; max-width: 620px; }
+.msg.you .col { align-items: flex-end; }
+
+.who {
+  margin-bottom: 4px;
+  padding: 0 3px;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: .16em;
+  color: var(--ink-soft);
+}
+
+.bub {
+  box-sizing: border-box;
+  padding: 10px 16px 12px;
+  border: 3px solid var(--ink);
+  background: var(--ground-light);
+  font-family: var(--font-body);
+  font-weight: 300;
+  font-size: 22px;
+  line-height: 1.45;
+  color: var(--ink);
+}
+.msg.you .bub { background: var(--frame); }   /* ฝั่งเรา = ครีมเหลือง แยกด้วยสี ไม่ต้องพึ่งตำแหน่งอย่างเดียว */
+.bub p { margin: 0; }
+.bub p + p { margin-top: 5px; }
+
+/* ---- ป้ายจุดเปลี่ยน (ใช้ --accent จุดเดียวของสไลด์) ---- */
+.mark {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 9px;
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 16px;
+  color: var(--accent);
+}
+.mark i {
+  width: 10px;
+  height: 10px;
+  background: var(--accent);
+  animation: markBlink 1.6s steps(1, end) infinite;
+}
+@keyframes markBlink { 0%, 60% { opacity: 1 } 61%, 100% { opacity: .25 } }
+
+/* ---- รูปหน้าจอที่แนบมา ---- */
+.shot {
+  width: 208px;
+  margin-top: 10px;
+  background: var(--ground-light);
+  border: 3px solid var(--ink);
+}
+.shot .top { height: 15px; background: var(--sign); border-bottom: 3px solid var(--ink); }
+.shot .body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 9px;
+  padding: 13px 14px 15px;
+}
+.warn { display: block; width: 34px; height: 34px; color: var(--ink); }
+.shot .line { height: 7px; background: var(--ink-soft); opacity: .45; }
+.shot .btn { width: 96px; height: 21px; background: var(--ash); }
+
+/* ---- log + โค้ดที่แนบมา ---- */
+.log {
+  margin-top: 10px;
+  padding: 10px 13px;
+  background: var(--ground);
+  border: 3px solid var(--ink);
+  font-family: var(--font-mono);
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--ink);
+  white-space: pre;
+  overflow: hidden;
+}
+
+/* ---- micro loop: AI กำลังพิมพ์ ---- */
+.dots { display: flex; align-items: center; gap: 7px; height: 25px; }
+.dots i {
+  width: 9px;
+  height: 9px;
+  background: var(--ink-soft);
+  opacity: .3;
+  animation: dotPulse 1.5s steps(1, end) infinite;
+}
+.dots i:nth-child(2) { animation-delay: .3s; }
+.dots i:nth-child(3) { animation-delay: .6s; }
+@keyframes dotPulse { 0%, 60% { opacity: .85 } 61%, 100% { opacity: .25 } }
+
+/* ---- บรรทัดสรุปใต้กล่อง ---- */
+.sum {
+  position: absolute;
+  left: 50%;
+  bottom: 46px;
+  transform: translateX(-50%);
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 22px;
+  letter-spacing: .01em;
+  color: var(--ink-soft);
+  white-space: nowrap;
+  opacity: 0;
+}
+.sum.is-on { animation: sumIn .45s cubic-bezier(.16, 1, .3, 1) both; }
+@keyframes sumIn {
+  from { opacity: 0; transform: translate(-50%, 10px) }
+  to   { opacity: 1; transform: translate(-50%, 0) }
+}
+
+/* ---- ตัวบอกว่ารอคลิก ---- */
+.wait {
+  position: absolute;
+  left: 50%;
+  bottom: 11px;
+  transform: translateX(-50%);
+  font-family: var(--font-mono);
+  font-size: 17px;
+  color: var(--ink);
+  opacity: 0;
+}
+.stage.is-waiting .wait {
+  animation: waitIn .3s ease-out both, waitBlink 1.25s steps(1, end) .3s infinite;
+}
+@keyframes waitIn    { from { opacity: 0 } to { opacity: 1 } }
+@keyframes waitBlink { 0%, 55% { opacity: 1 } 56%, 100% { opacity: 0 } }
+
+/* ---- ปุ่มควบคุม มุมล่างขวา (ชุดเดียวกับสไลด์ 1–2) ---- */
+.controls {
+  position: absolute;
+  right: 16px;
+  bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  z-index: 5;
+}
+.controls button {
+  padding: 7px 9px;
+  background: none;
+  border: 0;
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: .08em;
+  line-height: 1;
+  cursor: pointer;
+  opacity: .28;
+  transition: opacity .15s;
+}
+.controls button:hover,
+.controls button:focus-visible { opacity: .95; outline: none; }
+.controls button[aria-pressed="true"] {
+  opacity: .95;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-thickness: 2px;
+}
+.controls button:disabled { opacity: .1; cursor: default; }
+
+/* 16 beat เยอะเกินกว่าจะทำ pips — ใช้เลข n/16 แทน */
+.count {
+  padding: 0 7px;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: .08em;
+  color: var(--ink);
+  opacity: .28;
+  transition: opacity .15s;
+}
+.controls:hover .count { opacity: .95; }
+
+/* ---- exit ---- */
+.blink {
+  position: fixed;
+  inset: 0;
+  background: var(--ink);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 99;
+}
+.blink.is-out { animation: doorBlink .62s steps(1, end) forwards; }
+@keyframes doorBlink {
+  0% { opacity: 0 } 14% { opacity: 1 } 28% { opacity: 0 }
+  42% { opacity: 1 } 56% { opacity: 0 } 70% { opacity: 1 } 100% { opacity: 1 }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .msg { transition: none !important; }
+  .dots i, .mark i { animation: none; }
+  .sum.is-on { animation: none; opacity: 1; transform: translateX(-50%); }
+  .stage.is-waiting .wait { animation: none; opacity: 1; }
+  .blink.is-out { animation: none; opacity: 1; }
+}
+</style>
+</head>
+<body>
+
+<div class="stage" id="stage">
+  <div class="head">ระดับ 01 — Chat</div>
+
+  <div class="chatbox">
+    <div class="bar"><b></b>IT Support — ลูกค้าสร้าง order ไม่ได้</div>
+    <div class="viewport"><div class="feed" id="feed"></div></div>
+  </div>
+
+  <div class="sum" id="sum">16 ข้อความ · 4 รอบแรกคือการเดา</div>
+
+  <div class="wait">&#9660;</div>
+
+  <div class="controls" id="controls">
+    <button type="button" id="btn-prev"  title="ถอยหลังหนึ่งข้อความ (←)">&#9664;</button>
+    <button type="button" id="btn-next"  title="ข้อความถัดไป (→ / Space)">&#9654;</button>
+    <div class="count" id="count" title="ข้อความที่เท่าไหร่">0/16</div>
+    <button type="button" id="btn-reset" title="เริ่มสไลด์นี้ใหม่ (R)">&#8635;</button>
+    <button type="button" id="btn-auto"  title="เดินหน้าเองอัตโนมัติ" aria-pressed="false">AUTO</button>
+  </div>
+</div>
+
+<div class="blink" id="blink"></div>
+
+<script>
+(function () {
+  "use strict";
+
+  var NEXT = "04-prompt.html";
+  var PREV = "02-levels.html";
+
+  /* ============================================================
+     บทสนทนา — 1 ข้อความ = 1 beat
+     who : "you" ฝั่งเรา (ขวา ครีมเหลือง) / "ai" ฝั่ง AI (ซ้าย)
+     p[] : ย่อหน้า
+     shot / log : ของแนบ / mark : ป้ายจุดเปลี่ยน
+     ============================================================ */
+  var MSGS = [
+    { who: "you", p: ["ลูกค้าสร้าง order ไม่ได้ครับ log ขึ้น error 00412"] },
+    { who: "ai",  p: ["error 00412 คือรหัสสินค้าหมดสต็อกครับ",
+                      "ให้ลูกค้าลองเลือกสินค้าตัวอื่นดูนะครับ"] },
+
+    { who: "you", p: ["สินค้ามีสต็อกอยู่ 200 ชิ้น"] },
+    { who: "ai",  p: ["งั้นน่าจะเป็นปัญหา cache ครับ ลองล้าง cache แล้วสั่งใหม่อีกครั้ง"] },
+
+    { who: "you", p: ["ล้างแล้ว ยังเหมือนเดิม"], shot: true },
+    { who: "ai",  p: ["จากรูป ปุ่ม “ยืนยันคำสั่งซื้อ” เป็นสีเทาอยู่",
+                      "น่าจะยังกรอกข้อมูลไม่ครบครับ"] },
+
+    { who: "you", p: ["กรอกครบแล้ว ปุ่มกดได้ปกติ กดแล้วถึงเด้ง error"] },
+    { who: "ai",  p: ["งั้นอาจเป็นเรื่องสิทธิ์ของ user ครับ ลองเช็ค role ดู"] },
+
+    { who: "you", p: ["ลูกค้าคนอื่นสร้างได้ปกติ คนนี้คนเดียวที่ไม่ได้"] },
+    { who: "ai",  p: ["รบกวนขอ log เต็มๆ กับโค้ดส่วนที่ตรวจ order ได้ไหมครับ"],
+      mark: "จุดเปลี่ยน — AI ขอ context เอง" },
+
+    { who: "you", p: ["นี่ครับ"],
+      log: "ERROR 00412   order/validate.js:88\n" +
+           "if (cust.creditLimit >= order.total)\n" +
+           "customer #8842 { creditLimit: null }" },
+    { who: "ai",  p: ["เจอแล้วครับ ลูกค้ารายนี้ creditLimit เป็น null",
+                      "null เทียบกับตัวเลขได้ false เสมอ โค้ดเลยตีว่าวงเงินไม่พอ ทั้งที่จริงคือยังไม่เคยตั้งวงเงิน"] },
+
+    { who: "you", p: ["แล้วควรแก้ตรงไหนดี"] },
+    { who: "ai",  p: ["เฉพาะหน้า: ตั้ง creditLimit ให้ลูกค้ารายนี้ก่อน",
+                      "ระยะยาว: แยกเคส null ออกมา แล้วให้ error บอกสาเหตุจริงแทนรหัส 00412 ลอยๆ"] },
+
+    { who: "you", p: ["แก้แล้ว ลูกค้าสร้าง order ได้แล้ว ขอบคุณมากครับ"] },
+    { who: "ai",  p: ["ยินดีครับ เคสนี้จะเกิดกับลูกค้าทุกรายที่ยังไม่เคยตั้งวงเงิน",
+                      "ลองไล่เช็ครายอื่นด้วยนะครับ"] }
+  ];
+
+  var BEATS = MSGS.length;
+
+  /* AUTO — ให้เวลาตามความยาวข้อความ ปิดท้ายยาวหน่อยไว้อ่านบรรทัดสรุป */
+  var AUTO_HOLD = [0].concat(MSGS.map(function (m, i) {
+    if (i === MSGS.length - 1) return 7000;
+    var n = m.p.join("").length + (m.log ? 60 : 0) + (m.shot ? 40 : 0);
+    return Math.min(4200, Math.max(1900, 900 + n * 26));
+  }));
+
+  var stage  = document.getElementById("stage");
+  var feed   = document.getElementById("feed");
+  var sumEl  = document.getElementById("sum");
+  var blink  = document.getElementById("blink");
+  var embed  = window.parent !== window;
+  var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  function fit() {
+    stage.style.setProperty("--stage-scale",
+      Math.min(window.innerWidth / 1280, window.innerHeight / 720));
+  }
+  fit();
+  window.addEventListener("resize", fit);
+
+  /* ---- สร้าง element ของข้อความ ---- */
+  var WARN = '<svg class="warn" viewBox="0 0 13 13" shape-rendering="crispEdges" aria-hidden="true">' +
+             '<rect x="5" y="0" width="3" height="2" fill="currentColor"/>' +
+             '<rect x="4" y="2" width="5" height="2" fill="currentColor"/>' +
+             '<rect x="3" y="4" width="7" height="2" fill="currentColor"/>' +
+             '<rect x="2" y="6" width="9" height="2" fill="currentColor"/>' +
+             '<rect x="1" y="8" width="11" height="2" fill="currentColor"/>' +
+             '<rect x="0" y="10" width="13" height="2" fill="currentColor"/>' +
+             '<rect x="6" y="3" width="1" height="5" fill="var(--ground-light)"/>' +
+             '<rect x="6" y="9" width="1" height="1" fill="var(--ground-light)"/>' +
+             '</svg>';
+
+  var SHOT = '<div class="shot"><div class="top"></div><div class="body">' + WARN +
+             '<div class="line" style="width:130px"></div>' +
+             '<div class="line" style="width:92px"></div>' +
+             '<div class="btn"></div></div></div>';
+
+  function esc(s) {
+    return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+
+  function buildMsg(i) {
+    var m = MSGS[i];
+    var el = document.createElement("div");
+    el.className = "msg " + m.who;
+    var inner = '<div class="who">' + (m.who === "you" ? "คุณ" : "AI") + '</div>' +
+                '<div class="bub">' +
+                m.p.map(function (t) { return "<p>" + t + "</p>"; }).join("") +
+                '</div>';
+    if (m.shot) inner += SHOT;
+    if (m.log)  inner += '<div class="log">' + esc(m.log) + '</div>';
+    if (m.mark) inner += '<div class="mark"><i></i>' + m.mark + '</div>';
+    el.innerHTML = '<div class="col">' + inner + '</div>';
+    return el;
+  }
+
+  /* ---- ตัวบอกว่า AI กำลังพิมพ์ — โผล่เมื่อตาถัดไปเป็นของ AI ---- */
+  function clearTyping() {
+    var t = feed.querySelector(".typing");
+    if (t) t.parentNode.removeChild(t);
+  }
+  function addTyping() {
+    clearTyping();
+    if (leaving || beat >= BEATS || MSGS[beat].who !== "ai") return;
+    var el = document.createElement("div");
+    el.className = "msg ai typing";
+    el.innerHTML = '<div class="col"><div class="who">AI</div>' +
+                   '<div class="bub"><div class="dots"><i></i><i></i><i></i></div></div></div>';
+    feed.appendChild(el);
+  }
+
+  /* ---- beat state ---- */
+  var beat = 0, shown = 0, auto = false, leaving = false;
+  var timers = [];
+  function at(ms, fn) { timers.push(setTimeout(fn, reduce ? 0 : ms)); }
+  function clearTimers() { timers.forEach(clearTimeout); timers = []; }
+
+  function rebuild() {
+    clearTyping();
+    feed.innerHTML = "";
+    for (var i = 0; i < beat; i++) feed.appendChild(buildMsg(i));
+    shown = beat;
+    addTyping();
+  }
+
+  /* ข้อความใหม่เกิดมาพร้อม margin-top ติดลบเท่าความสูงตัวเอง (กองไม่ขยับ)
+     แล้ว transition กลับเป็น 0 → ทั้งกองถูกดันขึ้น = การเลื่อนของแชท */
+  function push() {
+    clearTyping();
+    var el = buildMsg(beat - 1);
+    feed.appendChild(el);
+    var h = el.offsetHeight;
+    el.style.marginTop = -h + "px";
+    el.style.opacity = "0";
+    el.offsetHeight;                                  /* บังคับ reflow ก่อนเปลี่ยนค่า */
+    el.style.transition = "margin-top .36s cubic-bezier(.16,1,.3,1), opacity .3s ease-out";
+    el.style.marginTop = "0px";
+    el.style.opacity = "1";
+    shown = beat;
+    at(400, addTyping);
+  }
+
+  function paint() {
+    document.getElementById("count").textContent = beat + "/" + BEATS;
+    stage.classList.toggle("is-waiting", beat > 0 && !leaving);
+    document.getElementById("btn-prev").disabled = (beat <= 1 && !embed && !PREV);
+    document.getElementById("btn-next").disabled = leaving;
+    sumEl.classList.toggle("is-on", beat === BEATS && reduce);
+  }
+
+  function armAuto() { if (auto && !leaving) at(AUTO_HOLD[beat], advance); }
+
+  function setBeat(n) {
+    clearTimers();
+    var step = (n === beat + 1);
+    beat = n;
+    if (step && !reduce) push(); else rebuild();
+    paint();
+    if (beat === BEATS) at(reduce ? 0 : 950, function () { sumEl.classList.add("is-on"); });
+    else sumEl.classList.remove("is-on");
+    armAuto();
+  }
+
+  function advance() {
+    if (leaving) return;
+    if (beat < BEATS) setBeat(beat + 1);
+    else go("next");
+  }
+
+  function back() {
+    if (leaving) return;
+    if (beat > 1) setBeat(beat - 1);
+    else go("prev");
+  }
+
+  function reset() {
+    clearTimers();
+    blink.classList.remove("is-out");
+    leaving = false;
+    setBeat(0);
+    at(60, function () { setBeat(1); });
+  }
+
+  function go(dir) {
+    if (leaving) return;
+    var target = dir === "prev" ? PREV : NEXT;
+    if (!embed && !target) return;
+    leaving = true;
+    clearTimers();
+    paint();
+    blink.classList.add("is-out");
+    setTimeout(function () {
+      if (embed) {
+        window.parent.postMessage({ type: "slide:" + dir, from: "03-chat" }, "*");
+      } else {
+        window.location.href = target;
+      }
+    }, reduce ? 0 : 620);
+  }
+
+  /* ---- ปุ่มควบคุม ---- */
+  var controls = document.getElementById("controls");
+  var btnAuto  = document.getElementById("btn-auto");
+  controls.addEventListener("click", function (e) { e.stopPropagation(); });
+
+  document.getElementById("btn-next").addEventListener("click", advance);
+  document.getElementById("btn-prev").addEventListener("click", back);
+  document.getElementById("btn-reset").addEventListener("click", reset);
+  btnAuto.addEventListener("click", function () {
+    auto = !auto;
+    btnAuto.setAttribute("aria-pressed", auto ? "true" : "false");
+    clearTimers();
+    armAuto();
+  });
+
+  document.addEventListener("click", advance);
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Enter" || e.key === " " || e.key === "ArrowRight" || e.key === "PageDown") {
+      e.preventDefault(); advance();
+    } else if (e.key === "ArrowLeft" || e.key === "PageUp") {
+      e.preventDefault(); back();
+    } else if (e.key === "r" || e.key === "R") {
+      reset();
+    }
+  });
+
+  paint();
+  at(220, function () { setBeat(1); });
+})();
+</script>
+</body>
+</html>
