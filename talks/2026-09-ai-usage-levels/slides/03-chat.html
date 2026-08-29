@@ -139,13 +139,27 @@ body {
 .msg.you .col { align-items: flex-end; }
 
 .who {
-  margin-bottom: 4px;
-  padding: 0 3px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 5px;
+  padding: 0 2px;
   font-family: var(--font-mono);
   font-weight: 600;
   font-size: 12px;
   letter-spacing: .16em;
   color: var(--ink-soft);
+}
+/* avatar หัวคน/หัวหุ่น — เส้นทึบสีเดียว ไม่ลงสี ให้พอดูออกว่าใครพูด
+   ปั้นเป็น SVG พิกเซลกริด 13x13 เหมือนไอคอนเครื่องมือในสไลด์ 2
+   ไม่มี rect เจาะพื้นหลังเลย ตา/ปากเป็นช่องว่างล้วน จะได้วางบนพื้นสีอะไรก็ได้ */
+.av {
+  flex: 0 0 auto;
+  display: block;
+  width: 26px;
+  height: 26px;
+  color: var(--ink-soft);
+  opacity: .85;
 }
 
 .bub {
@@ -445,6 +459,51 @@ body {
              '<rect x="6" y="9" width="1" height="1" fill="var(--ground-light)"/>' +
              '</svg>';
 
+  /* ---- avatar 13x13 — [x, y, w, h] ทึบล้วน ตา/ปากคือช่องว่างที่ไม่ได้วาด ----
+     ไม่มี rect เจาะพื้นหลังเลย เอาไปวางบนพื้นสีอะไรก็ได้
+     คน  : หัววงรีเปิด ตาสองจุด ปากขีดเดียว ต่อคอแล้วบานเป็นไหล่
+     หุ่น : หัวเหลี่ยม เสาอากาศกลางหัว ตาสี่เหลี่ยม 2x2 ปากเป็นแถบ */
+  var AVATARS = {
+    human: [[4, 1, 5, 1],                                   /* กระหม่อม */
+            [3, 2, 1, 1], [9, 2, 1, 1],                     /* มุมบนโค้งเข้า */
+            [2, 3, 1, 3], [10, 3, 1, 3],                    /* แก้มป่องออก */
+            [4, 4, 1, 1], [8, 4, 1, 1],                     /* ตา */
+            [3, 6, 1, 1], [9, 6, 1, 1],                     /* มุมล่างโค้งเข้า */
+            [5, 6, 3, 1],                                   /* ปาก */
+            [4, 7, 5, 1],                                   /* คาง */
+            [5, 8, 1, 1], [7, 8, 1, 1],                     /* คอ */
+            [3, 9, 2, 1], [8, 9, 2, 1],                     /* ไหล่ลาดโค้ง */
+            [2, 10, 1, 1], [10, 10, 1, 1],
+            [1, 11, 1, 1], [11, 11, 1, 1],
+            [1, 12, 11, 1]],                                /* ชายอก */
+    robot: [[5, 0, 3, 1], [6, 1, 1, 1],                     /* เสาอากาศ */
+            [2, 2, 9, 1], [2, 8, 9, 1],                     /* ขอบหัวบน–ล่าง */
+            [2, 3, 1, 5], [10, 3, 1, 5],                    /* ขอบหัวซ้าย–ขวา */
+            [4, 4, 2, 2], [7, 4, 2, 2],                     /* ตา */
+            [4, 7, 5, 1],                                   /* ปาก */
+            [5, 9, 3, 1],                                   /* คอ */
+            [1, 10, 11, 1],                                 /* บ่า */
+            [1, 11, 1, 1], [11, 11, 1, 1],
+            [1, 12, 11, 1]]                                 /* ชายอก */
+  };
+
+  function avatar(name) {
+    return '<svg class="av av-' + name + '" viewBox="0 0 13 13" ' +
+           'shape-rendering="crispEdges" aria-hidden="true">' +
+           AVATARS[name].map(function (r) {
+             return '<rect x="' + r[0] + '" y="' + r[1] + '" width="' + r[2] +
+                    '" height="' + r[3] + '" fill="currentColor"/>';
+           }).join("") + '</svg>';
+  }
+
+  /* แถวชื่อผู้พูด — ฝั่ง AI avatar อยู่ซ้ายของชื่อ ฝั่งเราอยู่ขวา (ชิดขอบนอกเสมอ) */
+  function whoRow(who) {
+    return '<div class="who">' +
+           (who === "ai" ? avatar("robot") + "<span>AI</span>"
+                         : "<span>คุณ</span>" + avatar("human")) +
+           '</div>';
+  }
+
   var SHOT = '<div class="shot"><div class="top"></div><div class="body">' + WARN +
              '<div class="line" style="width:130px"></div>' +
              '<div class="line" style="width:92px"></div>' +
@@ -458,7 +517,7 @@ body {
     var m = MSGS[i];
     var el = document.createElement("div");
     el.className = "msg " + m.who;
-    var inner = '<div class="who">' + (m.who === "you" ? "คุณ" : "AI") + '</div>' +
+    var inner = whoRow(m.who) +
                 '<div class="bub">' +
                 m.p.map(function (t) { return "<p>" + t + "</p>"; }).join("") +
                 '</div>';
@@ -479,7 +538,7 @@ body {
     if (leaving || beat >= BEATS || MSGS[beat].who !== "ai") return;
     var el = document.createElement("div");
     el.className = "msg ai typing";
-    el.innerHTML = '<div class="col"><div class="who">AI</div>' +
+    el.innerHTML = '<div class="col">' + whoRow("ai") +
                    '<div class="bub"><div class="dots"><i></i><i></i><i></i></div></div></div>';
     feed.appendChild(el);
   }
