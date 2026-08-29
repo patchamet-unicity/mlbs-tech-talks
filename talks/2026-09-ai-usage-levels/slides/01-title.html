@@ -1,0 +1,549 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Level Up How You Use AI — Title</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="theme.css">
+<style>
+/* ============================================================
+   สไลด์ 1 — หน้าจอเปิดเกมสไตล์ GBC เล่นเป็น "beat" แบบ cutscene
+
+   beat 1  กรอบ title เลื่อนลง                        → รอคลิก
+   beat 2  คน/หุ่นเข้าฉาก + ทักทาย + idle คุยกันไปเรื่อยๆ  → รอคลิก
+   คลิกอีกที = exit วูบมืด ไปสไลด์ 2
+
+   กติกาการกด:
+   - คลิกระหว่างอนิเมชันยังไม่จบ = snap ไปท่าจบของ beat นั้นทันที ไม่รอ
+   - ◀ ถอยทีละ beat ก่อน สุดทางแล้วค่อยข้ามไปสไลด์ก่อนหน้า
+   - AUTO = เดินหน้า beat เองตาม AUTO_HOLD
+
+   โครง CSS: state ของ beat คุมด้วยคลาสบน .stage
+   - `bN`    = ท่าจบของ beat นั้น (settled) — เป็น transform/opacity เฉยๆ
+   - `bN-in` = กำลังเล่นอนิเมชันเข้า beat นั้น — เป็น animation
+   animation ชนะ normal declaration อยู่แล้ว เลยใส่ทั้งสองคลาสพร้อมกันได้
+   ถอด `bN-in` ออกเมื่อไหร่ = snap ไปท่าจบทันที
+
+   กติกาสี: --accent ใช้ได้จุดเดียวต่อสไลด์ — หมวกแดงของหุ่นกินไปแล้ว
+   ทุกอย่างในหน้านี้จึงใช้ --ink / --ink-soft / --ash เท่านั้น
+   ============================================================ */
+
+html, body { height: 100%; overflow: hidden; }
+body {
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* ---- เวที 1280x720 ย่อ/ขยายตามจอด้วย --stage-scale (ตั้งจาก JS) ---- */
+.stage {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  width: 1280px;
+  height: 720px;
+  transform: translate(-50%, -50%) scale(var(--stage-scale, 1));
+  transform-origin: center center;
+  overflow: hidden;
+  background: var(--ground);
+}
+
+/* ---- beat 1 : กรอบ title ---- */
+.title-frame {
+  position: absolute;
+  left: 50%;
+  top: 76px;
+  transform: translateX(-50%);
+  padding: 32px 74px;
+  background: var(--ground-light);
+  border: 5px solid var(--ink);
+  box-shadow: inset 0 0 0 3px var(--ground-light), inset 0 0 0 5px var(--ash);
+  text-align: center;
+  opacity: 0;
+}
+.stage.b1 .title-frame    { opacity: 1; }
+.stage.b1-in .title-frame { animation: frameDrop .75s cubic-bezier(.16, 1, .3, 1) .15s both; }
+@keyframes frameDrop {
+  from { opacity: 0; transform: translate(-50%, -280px); }
+  to   { opacity: 1; transform: translate(-50%, 0); }
+}
+.title-frame h1 {
+  margin: 0;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 58px;
+  line-height: 1.16;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+.title-frame .sub {
+  margin-top: 10px;
+  font-family: var(--font-mono);
+  font-size: 16px;
+  letter-spacing: .22em;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+}
+
+/* ---- ตัวบอกว่า "จบ beat แล้ว กำลังรอคลิก" ----
+   หลักเดียวกับ ▼ กะพริบท้ายกล่องข้อความในเกม GB — โผล่ทุกครั้งที่รอ หายทันทีที่กด */
+.begin {
+  position: absolute;
+  left: 50%;
+  top: 336px;
+  transform: translateX(-50%);
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 23px;
+  letter-spacing: .3em;
+  color: var(--ink);
+  opacity: 0;
+  white-space: nowrap;
+}
+.stage.is-waiting .begin {
+  animation: beginIn .4s ease-out both, beginBlink 1.25s steps(1, end) .4s infinite;
+}
+@keyframes beginIn    { from { opacity: 0 } to { opacity: 1 } }
+@keyframes beginBlink { 0%, 55% { opacity: 1 } 56%, 100% { opacity: 0 } }
+
+/* ---- พื้น ---- */
+.floor {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 44px;
+  height: 3px;
+  background: var(--ash);
+  opacity: .5;
+}
+
+/* ---- beat 2 : ตัวละคร ---- */
+.cast {
+  position: absolute;
+  left: 50%;
+  bottom: 44px;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: flex-end;
+  gap: 96px;
+}
+.actor {
+  position: relative;
+  --char-size: 200px;
+}
+.actor .char { height: var(--char-size); }
+
+.actor-human { transform: translateX(-780px); }
+.actor-robot { transform: translateX(780px); }
+.stage.b2 .actor-human,
+.stage.b2 .actor-robot { transform: translateX(0); }
+.stage.b2-in .actor-human { animation: walkIn 2.8s linear .15s both; }
+.stage.b2-in .actor-robot { animation: floatIn 2.8s cubic-bezier(.3, .7, .4, 1) .15s both; }
+@keyframes walkIn  { from { transform: translateX(-780px) } to { transform: translateX(0) } }
+@keyframes floatIn { from { transform: translateX(780px) }  to { transform: translateX(0) } }
+
+/* จังหวะเด้งทักทายอยู่ที่ .sprite ชั้นใน ไม่ใช่ .actor
+   — ถ้าใส่ที่ .actor มันจะไปทับ animation เข้าฉาก พอถอดคลาสออกจะเดินเข้ามาใหม่ */
+.sprite.is-greet { animation: greetHop .42s ease-out 2 both; }
+@keyframes greetHop {
+  0%, 100% { transform: translateY(0) }
+  40%      { transform: translateY(-16px) }
+}
+
+/* ---- speech bubble — เฉียงบนฝั่งนอกของตัวละคร ทรงสี่เหลี่ยม ---- */
+.bubble {
+  position: absolute;
+  bottom: calc(var(--char-size) * .84);
+  min-width: 58px;
+  padding: 9px 16px 10px;
+  background: var(--ground-light);
+  border: 4px solid var(--ink);
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 20px;
+  letter-spacing: .12em;
+  line-height: 1;
+  color: var(--ink);
+  text-align: center;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+}
+.actor-human .bubble { right: calc(100% - 40px); }
+.actor-robot .bubble { left:  calc(100% - 40px); }
+
+.bubble::after {          /* หางบอลลูนแบบเหลี่ยม ใช้ขอบสองด้านทำเส้น */
+  content: "";
+  position: absolute;
+  bottom: -14px;
+  width: 10px;
+  height: 10px;
+  background: var(--ground-light);
+  border-bottom: 4px solid var(--ink);
+}
+.actor-human .bubble::after { right: 16px; border-right: 4px solid var(--ink); }
+.actor-robot .bubble::after { left:  16px; border-left:  4px solid var(--ink); }
+
+.bubble.is-on { opacity: 1; animation: bubblePop .22s steps(2, end) both; }
+@keyframes bubblePop {
+  from { opacity: 0; transform: translateY(8px) }
+  to   { opacity: 1; transform: translateY(0) }
+}
+
+/* ---- ปุ่มควบคุม มุมล่างขวา ---- */
+.controls {
+  position: absolute;
+  right: 26px;
+  bottom: 22px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 5;
+}
+.controls button {
+  min-width: 42px;
+  height: 38px;
+  padding: 0 12px;
+  background: var(--ground-light);
+  border: 3px solid var(--ink);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 15px;
+  letter-spacing: .08em;
+  line-height: 1;
+  cursor: pointer;
+  opacity: .45;
+  transition: opacity .15s;
+}
+.controls button:hover,
+.controls button:focus-visible { opacity: 1; outline: none; }
+.controls button[aria-pressed="true"] {
+  opacity: 1;
+  background: var(--ink);
+  color: var(--ground-light);
+}
+.controls button:disabled { opacity: .18; cursor: default; }
+
+/* ตัวบอก beat — ● beat ที่ผ่าน/อยู่ ○ beat ที่ยังไม่ถึง */
+.pips {
+  display: flex;
+  gap: 6px;
+  padding: 0 6px;
+  opacity: .45;
+  transition: opacity .15s;
+}
+.controls:hover .pips { opacity: 1; }
+.pip {
+  width: 10px;
+  height: 10px;
+  border: 3px solid var(--ink);
+  background: transparent;
+}
+.pip.is-done { background: var(--ink); }
+
+/* ---- exit: จอวูบมืดแบบเข้าประตูใน GBC ---- */
+.blink {
+  position: fixed;
+  inset: 0;
+  background: var(--ink);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 99;
+}
+.blink.is-out { animation: doorBlink .62s steps(1, end) forwards; }
+@keyframes doorBlink {
+  0%   { opacity: 0 }
+  14%  { opacity: 1 }
+  28%  { opacity: 0 }
+  42%  { opacity: 1 }
+  56%  { opacity: 0 }
+  70%  { opacity: 1 }
+  100% { opacity: 1 }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stage.b1-in .title-frame,
+  .stage.b2-in .actor-human,
+  .stage.b2-in .actor-robot,
+  .sprite.is-greet,
+  .bubble.is-on { animation: none; }
+  .stage.is-waiting .begin { animation: none; opacity: 1; }
+  .blink.is-out { animation: none; opacity: 1; }
+}
+</style>
+</head>
+<body>
+
+<div class="stage" id="stage">
+  <div class="title-frame">
+    <h1>Level Up<br>How You Use AI</h1>
+    <div class="sub">TechTalks &middot; Sep 2026</div>
+  </div>
+
+  <div class="begin">&#9654; LET&rsquo;S BEGIN</div>
+
+  <div class="floor"></div>
+
+  <div class="cast">
+    <div class="actor actor-human" id="human">
+      <div class="bubble" id="bubble-human"></div>
+      <div class="sprite" data-char="human-right-walk"></div>
+    </div>
+    <div class="actor actor-robot" id="robot">
+      <div class="bubble" id="bubble-robot"></div>
+      <div class="sprite" data-char="robot-left"></div>
+    </div>
+  </div>
+
+  <div class="controls" id="controls">
+    <button type="button" id="btn-prev"  title="ถอยหลังหนึ่งจังหวะ (←)">&#9664;</button>
+    <button type="button" id="btn-next"  title="เดินหน้าหนึ่งจังหวะ (→ / Space)">&#9654;</button>
+    <div class="pips" id="pips" title="จังหวะของสไลด์นี้"></div>
+    <button type="button" id="btn-reset" title="เริ่มสไลด์นี้ใหม่ (R)">&#8635;</button>
+    <button type="button" id="btn-auto"  title="เดินหน้าจังหวะเองอัตโนมัติ" aria-pressed="false">AUTO</button>
+  </div>
+</div>
+
+<div class="blink" id="blink"></div>
+
+<script src="../../assets/characters/characters.js"></script>
+<script>
+(function () {
+  "use strict";
+
+  /* หน้าถัดไป/ก่อนหน้า — ถ้าอยู่ใน iframe ของตัวรวมสไลด์ จะส่ง message ให้ตัวรวมพาไปแทน */
+  var NEXT = "02-levels.html";
+  var PREV = null;                    /* สไลด์แรก ยังไม่มีหน้าก่อนหน้า */
+
+  var BEATS     = 2;
+  var AUTO_HOLD = [0, 2600, 9000];    /* AUTO: รอกี่ ms หลัง beat นั้นจบ ก่อนเดินหน้าเอง */
+
+  var stage  = document.getElementById("stage");
+  var human  = document.getElementById("human");
+  var robot  = document.getElementById("robot");
+  var blink  = document.getElementById("blink");
+  var embed  = window.parent !== window;
+  var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* ---- ย่อเวทีให้พอดีจอ ---- */
+  function fit() {
+    stage.style.setProperty("--stage-scale",
+      Math.min(window.innerWidth / 1280, window.innerHeight / 720));
+  }
+  fit();
+  window.addEventListener("resize", fit);
+
+  /* ---- ตัวช่วย ---- */
+  var timers = [];
+  function at(ms, fn) { timers.push(setTimeout(fn, reduce ? 0 : ms)); }
+  function clearTimers() { timers.forEach(clearTimeout); timers = []; }
+  function pick(a) { return a[Math.floor(Math.random() * a.length)]; }
+
+  function pose(actor, name) {
+    var svg = window.Characters && window.Characters.svg[name];
+    if (svg) actor.querySelector(".sprite").innerHTML = svg;
+  }
+
+  function hop(actor) {
+    if (reduce) return;
+    var s = actor.querySelector(".sprite");
+    s.classList.add("is-greet");
+    at(900, function () { s.classList.remove("is-greet"); });
+  }
+
+  /* ---- บอลลูน: เนื้อในไม่ต้องอ่านออก แค่ให้รู้ว่ากำลังคุยกันอยู่ ---- */
+  var HUMAN_LINES = ["▪▪▪", "?", "!", "▪▪", "…", "!?", "▪?"];
+  var ROBOT_LINES = ["0101", "♪", "▪▪▪", "!", "10▪", "…", "✓"];
+
+  function say(which, text, hold) {
+    var b = document.getElementById("bubble-" + which);
+    b.textContent = text;
+    b.classList.remove("is-on");
+    void b.offsetWidth;               /* บังคับให้ animation เริ่มใหม่ */
+    b.classList.add("is-on");
+    at(hold, function () { b.classList.remove("is-on"); });
+  }
+
+  function hideBubbles() {
+    document.getElementById("bubble-human").classList.remove("is-on");
+    document.getElementById("bubble-robot").classList.remove("is-on");
+  }
+
+  var turn = 0;
+  function chat() {
+    var mine = turn % 2 === 0;
+    var hold = 1400 + Math.random() * 700;
+    say(mine ? "human" : "robot", pick(mine ? HUMAN_LINES : ROBOT_LINES), hold);
+    turn++;
+    at(hold + 700 + Math.random() * 1600, chat);
+  }
+
+  /* ============================================================
+     beat state machine
+     ============================================================ */
+  var beat = 0;          /* 0 = ยังไม่เริ่ม */
+  var busy = false;      /* กำลังเล่นอนิเมชันเข้า beat อยู่ */
+  var auto = false;
+  var leaving = false;
+
+  var pipsEl = document.getElementById("pips");
+  var pips = [];
+  for (var i = 0; i < BEATS; i++) {
+    var p = document.createElement("span");
+    p.className = "pip";
+    pipsEl.appendChild(p);
+    pips.push(p);
+  }
+
+  function paint() {
+    pips.forEach(function (p, idx) { p.classList.toggle("is-done", idx < beat); });
+    stage.classList.toggle("is-waiting", !busy && beat > 0 && !leaving);
+    document.getElementById("btn-prev").disabled = (beat <= 1 && !embed && !PREV);
+    document.getElementById("btn-next").disabled = leaving;
+  }
+
+  /* ท่าจบของแต่ละ beat — เรียกได้ทั้งตอนอนิเมชันเล่นจบเอง และตอนถูก snap */
+  var settle = {
+    1: function () {},
+    2: function () {                  /* หันเข้าหากันแล้วคุยกันเองไปเรื่อยๆ */
+      pose(human, "human-right");
+      pose(robot, "robot-left");
+      turn = 0;
+      chat();
+    }
+  };
+
+  function done() {                   /* อนิเมชันเข้า beat นี้จบแล้ว */
+    busy = false;
+    stage.classList.remove("b" + beat + "-in");
+    settle[beat]();
+    paint();
+    if (auto) at(AUTO_HOLD[beat], advance);
+  }
+
+  function enter(n, animate) {
+    clearTimers();
+    hideBubbles();
+    beat = n;
+    busy = animate && !reduce;
+
+    stage.classList.add("b" + n);
+    if (busy) stage.classList.add("b" + n + "-in");
+    paint();
+
+    if (n === 2) {
+      pose(human, "human-right-walk");
+      pose(robot, "robot-left");
+    }
+
+    if (!busy) { done(); return; }
+
+    if (n === 1) {
+      at(950, done);
+    } else {
+      at(2950, function () {          /* ถึงที่หมาย — หันหน้าออกมาทักทาย แล้วยืนอยู่ตรงนั้น */
+        pose(human, "human");
+        pose(robot, "robot");
+        hop(human);
+        hop(robot);
+        say("human", "▪!", 1300);
+        at(350, function () { say("robot", "♪", 1200); });
+      });
+      at(4100, done);
+    }
+  }
+
+  function clearBeats() {
+    for (var n = 1; n <= BEATS; n++) stage.classList.remove("b" + n, "b" + n + "-in");
+  }
+
+  /* ---- เดินหน้า: กำลังเล่นอยู่ = snap ไปท่าจบ / จบแล้ว = beat ถัดไป / beat สุดท้าย = สไลด์ถัดไป ---- */
+  function advance() {
+    if (leaving) return;
+    if (busy) { clearTimers(); done(); return; }
+    if (beat < BEATS) enter(beat + 1, true);
+    else go("next");
+  }
+
+  function back() {
+    if (leaving) return;
+    if (beat > 1) {                   /* ถอย beat ก่อน — ถอยแบบไม่เล่นอนิเมชันซ้ำ */
+      clearTimers();
+      hideBubbles();
+      stage.classList.remove("b" + beat, "b" + beat + "-in");
+      beat -= 1;
+      busy = false;
+      settle[beat]();
+      paint();
+      if (auto) at(AUTO_HOLD[beat], advance);
+    } else {
+      go("prev");                     /* สุดทางแล้วค่อยข้ามไปสไลด์ก่อนหน้า */
+    }
+  }
+
+  function reset() {
+    clearTimers();
+    hideBubbles();
+    blink.classList.remove("is-out");
+    leaving = false;
+    stage.classList.remove("is-waiting");
+    clearBeats();
+    beat = 0;
+    busy = false;
+    void stage.offsetWidth;           /* reflow — ให้ keyframe เริ่มนับหนึ่งใหม่ */
+    enter(1, true);
+  }
+
+  /* ---- เปลี่ยนสไลด์ ---- */
+  function go(dir) {
+    if (leaving) return;
+    var target = dir === "prev" ? PREV : NEXT;
+    if (!embed && !target) return;    /* สไลด์แรก เปิดเดี่ยวๆ ไม่มีที่ให้ถอยไป */
+    leaving = true;
+    clearTimers();
+    paint();
+    blink.classList.add("is-out");
+    setTimeout(function () {
+      if (embed) {
+        window.parent.postMessage({ type: "slide:" + dir, from: "01-title" }, "*");
+      } else {
+        window.location.href = target;
+      }
+    }, reduce ? 0 : 620);
+  }
+
+  /* ---- ปุ่มควบคุม ---- */
+  var controls = document.getElementById("controls");
+  var btnAuto  = document.getElementById("btn-auto");
+  controls.addEventListener("click", function (e) { e.stopPropagation(); });
+
+  document.getElementById("btn-next").addEventListener("click", advance);
+  document.getElementById("btn-prev").addEventListener("click", back);
+  document.getElementById("btn-reset").addEventListener("click", reset);
+  btnAuto.addEventListener("click", function () {
+    auto = !auto;
+    btnAuto.setAttribute("aria-pressed", auto ? "true" : "false");
+    if (auto && !busy) at(AUTO_HOLD[beat], advance);
+  });
+
+  /* ---- คลิก/คีย์บอร์ด ---- */
+  document.addEventListener("click", advance);
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Enter" || e.key === " " || e.key === "ArrowRight" || e.key === "PageDown") {
+      e.preventDefault(); advance();
+    } else if (e.key === "ArrowLeft" || e.key === "PageUp") {
+      e.preventDefault(); back();
+    } else if (e.key === "r" || e.key === "R") {
+      reset();
+    }
+  });
+
+  enter(1, true);
+})();
+</script>
+</body>
+</html>
