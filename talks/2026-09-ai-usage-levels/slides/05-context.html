@@ -141,6 +141,34 @@ html, body {
   transition: opacity .4s ease-out;
 }
 .file.is-on { opacity: 1; }
+/* แถบหัวไฟล์กะพริบรับหนึ่งทีตอนของบินมาลง */
+.file .bar { transition: background .18s linear; }
+.file .bar.is-hit { background: var(--frame); }
+
+/* ---- ชั้นบินของ "ผี" — ลอยเหนือทุกกล่อง ไม่โดน overflow ตัด ---- */
+.fly {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+}
+/* แถบที่พับแล้ว: ก็อปปี้ย่อหน้าในกอง keep มาแล้วบีบความสูงลงเหลือเส้นเดียว */
+.gh {
+  position: absolute;
+  left: 0;
+  top: 0;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 3px 10px 3px 12px;
+  overflow: hidden;
+  background: var(--frame);
+  border-left: 4px solid var(--accent);
+  font-family: var(--font-body);
+  font-weight: 300;
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: var(--ink);
+}
 
 .doc {
   flex: 1 1 auto;
@@ -153,9 +181,15 @@ html, body {
   line-height: 1.38;
   color: var(--ink);
 }
-/* บล็อกในไฟล์โผล่ทีละก้อนตอน beat 2 */
-.blk { opacity: 0; transition: opacity .35s ease-out; }
-.blk.is-on { opacity: 1; }
+/* บล็อกในไฟล์ "คลี่ออก" ตอนแถบที่พับมาลงถึงที่ (beat 2)
+   scaleY จาก .7 -> 1 ทำให้รู้สึกเหมือนกระดาษที่พับไว้ถูกกางออก */
+.blk {
+  opacity: 0;
+  transform: scaleY(.7);
+  transform-origin: left top;
+  transition: opacity .3s ease-out, transform .34s cubic-bezier(.16, 1, .3, 1);
+}
+.blk.is-on { opacity: 1; transform: scaleY(1); }
 
 .dh {
   font-weight: 600;
@@ -730,7 +764,7 @@ html, body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .pane, .pane-send, .file, .blk, .dl, .chip, .grp.keep, .tk, .more .dotdot,
+  .pane, .pane-send, .file, .blk, .gh, .dl, .chip, .grp.keep, .tk, .more .dotdot,
   .msg { transition: none !important; }
   .dots i, .store.is-read i { animation: none; }
   .pawn, .pawn-bot, .say { transition: none; }
@@ -786,6 +820,8 @@ html, body {
     <div class="bar"><b></b><span id="send-t">พรอมต์ที่ส่งไปในระดับ 02</span><span class="n" id="send-n">1 ข้อความ</span></div>
     <div class="viewport"><div class="feed" id="feed"></div></div>
   </div>
+
+  <div class="fly" id="fly"></div>
 
   <div class="more" id="more">
     <div class="tk" id="tk-0"><span class="tl">ตั๋วใบที่ 3</span>EMP118 ลาออกไปแล้ว แต่ยังเข้า StaffHub ได้อยู่</div>
@@ -879,11 +915,11 @@ html, body {
         '<li>(แนบรูปหน้าจอ + login log)</li>' +
       '</ul></div>' +
     '<div class="grp keep" id="keep"><span class="tag">เหมือนกันทุกเคส</span>' +
-      '<p>ระบบคือ StaffHub บน production — SSO ผ่าน Azure AD repo <b>staffhub-api</b> ' +
+      '<p id="k-0">ระบบคือ StaffHub บน production — SSO ผ่าน Azure AD repo <b>staffhub-api</b> ' +
       'log อยู่ที่ Grafana ข้อมูล user อยู่ที่ pg-prod ทีมที่เกี่ยวข้อง: HR / IT Support / Identity</p>' +
-      '<p>ช่วยไล่หาสาเหตุที่แท้จริงให้ครับ เทียบข้อมูล user รายนั้นกับสิทธิ์ที่ระบบใช้จริงด้วย ' +
+      '<p id="k-1">ช่วยไล่หาสาเหตุที่แท้จริงให้ครับ เทียบข้อมูล user รายนั้นกับสิทธิ์ที่ระบบใช้จริงด้วย ' +
       'ถ้าข้อมูลไม่พออย่าเพิ่งเดา ให้ขอเพิ่มได้</p>' +
-      '<p>ตอบเป็นภาษาธุรกิจก่อน แล้วค่อยแนบหลักฐานทางเทคนิค ' +
+      '<p id="k-2">ตอบเป็นภาษาธุรกิจก่อน แล้วค่อยแนบหลักฐานทางเทคนิค ' +
       'แล้วแยกเป็น วิธีแก้เฉพาะหน้า / ระยะยาว / ทีมที่ต้องลงมือ</p></div>';
 
   /* ============================================================
@@ -944,6 +980,8 @@ html, body {
 
   var stage   = document.getElementById("stage");
   var fileEl  = document.getElementById("file");
+  var fileBar = fileEl.querySelector(".bar");
+  var flyEl   = document.getElementById("fly");
   var sendEl  = document.getElementById("send");
   var sendT   = document.getElementById("send-t");
   var sendN   = document.getElementById("send-n");
@@ -954,9 +992,24 @@ html, body {
   var reduce  = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   var BLKS = ["b-head", "b-addr", "b-step", "b-fmt"];
+  /* ย่อหน้าในกอง keep -> บล็อกในไฟล์ที่มันจะไปกลายเป็น (3 ย่อหน้า -> 4 บล็อก) */
+  var FOLD = [
+    ["k-0", ["b-head", "b-addr"]],
+    ["k-1", ["b-step"]],
+    ["k-2", ["b-fmt"]]
+  ];
   var TKS  = ["tk-0", "tk-1", "tk-2", "tk-dot"];
 
   function el(id) { return document.getElementById(id); }
+
+  /* พิกัดในระบบของเวที (หารสเกลออก) — แถบที่พับแล้วบินด้วยค่าชุดนี้ */
+  function box(e) {
+    var st = stage.getBoundingClientRect();
+    var k = parseFloat(getComputedStyle(stage).getPropertyValue("--stage-scale")) || 1;
+    var r = e.getBoundingClientRect();
+    return { x: (r.left - st.left) / k, y: (r.top - st.top) / k,
+             w: r.width / k, h: r.height / k };
+  }
 
   function fit() {
     stage.style.setProperty("--stage-scale",
@@ -1005,6 +1058,7 @@ html, body {
   /* วางสถานะของ beat n ตรงๆ ไม่มีอนิเมชัน — ใช้ตอนถอยหลัง/รีเซ็ต/reduce-motion */
   function rebuild(n) {
     stage.classList.add("is-jump");
+    flyEl.innerHTML = "";
 
     fileEl.classList.toggle("is-on", n >= 2);
     BLKS.forEach(function (id) { el(id).classList.toggle("is-on", n >= 2); });
@@ -1037,13 +1091,57 @@ html, body {
     stage.classList.remove("is-jump");
   }
 
-  /* ---- beat 2: กอง keep ยุบหายจากฟอง แล้วกลายเป็นไฟล์ทีละบล็อก ---- */
+  /* ---- beat 2: พับ -> บิน -> คลี่ ----
+     ย่อหน้าในกอง keep ถูก "พับ" ลงเป็นแถบบางๆ บินข้ามช่องกลางไปฝั่งซ้าย
+     แล้วคลี่ออกเป็นบล็อกจริงในไฟล์ ทำให้เห็นว่าชิ้นไหนไปกลายเป็นอะไร
+
+     ใช้ผี (clone ใน .fly) ไม่ใช่ย้ายของจริง เพราะย่อหน้าอยู่ในฟองที่ overflow ตัดอยู่
+     และปลายทางขนาดไม่เท่าต้นทาง ถ้า scale ทั้งก้อนตัวหนังสือจะยืด */
+  function foldFly(srcId, dstIds) {
+    var src = el(srcId);
+    if (!src) return;
+    var dsts = dstIds.map(function (i) { return el(i); }).filter(Boolean);
+    if (!dsts.length) return;
+
+    var a = box(src), b = box(dsts[0]);
+    var g = src.cloneNode(true);
+    g.removeAttribute("id");
+    g.className = "gh";
+    g.style.width = a.w + "px";
+    g.style.height = a.h + "px";
+    g.style.transform = "translate(" + a.x + "px," + a.y + "px)";
+    flyEl.appendChild(g);
+    src.style.visibility = "hidden";   /* ซ่อนแบบไม่ให้ย่อหน้าที่เหลือขยับ */
+
+    g.offsetHeight;                    /* บังคับ reflow ก่อนสั่งค่าใหม่ */
+    g.style.transition = "height .22s ease-in, width .22s ease-in, " +
+                         "transform .46s cubic-bezier(.5,0,.2,1) .18s, " +
+                         "opacity .16s linear .46s";
+    g.style.height = "7px";                          /* พับ */
+    g.style.width = Math.min(a.w, 210) + "px";
+    g.style.transform = "translate(" + b.x + "px," + b.y + "px)";
+    g.style.opacity = "0";
+
+    at(640, function () {
+      dsts.forEach(function (d) { d.classList.add("is-on"); });   /* คลี่ */
+      if (fileBar) {
+        fileBar.classList.add("is-hit");
+        at(240, function () { fileBar.classList.remove("is-hit"); });
+      }
+      if (g.parentNode) g.parentNode.removeChild(g);
+    });
+  }
+
   function toFile() {
-    el("keep").classList.add("is-off");
+    /* กล่องแชทต้องเลื่อนกลับที่ให้จบก่อน (0.55s) แล้วค่อยวัดพิกัด
+       ไม่งั้นต้นทางที่วัดได้จะเป็นตำแหน่งระหว่างเลื่อน แล้วผีจะออกตัวผิดที่ */
     sendEl.classList.remove("is-wide");
-    at(240, function () { fileEl.classList.add("is-on"); });
-    BLKS.forEach(function (id, i) {
-      at(400 + i * 230, function () { el(id).classList.add("is-on"); });
+    at(180, function () { fileEl.classList.add("is-on"); });
+    FOLD.forEach(function (f, i) {
+      at(680 + i * 300, function () { foldFly(f[0], f[1]); });
+    });
+    at(680 + (FOLD.length - 1) * 300 + 700, function () {
+      el("keep").classList.add("is-off");
     });
   }
 
