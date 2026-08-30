@@ -9,6 +9,7 @@
 | [02-levels.md](02-levels.md) | `../02-levels.html` — บันได 4 ระดับ |
 | [03-chat.md](03-chat.md) | `../03-chat.html` — บทสนทนา IT support ระดับ 01 Chat |
 | [04-prompt.md](04-prompt.md) | `../04-prompt.html` — ยุบ 17 ข้อความเป็นพรอมต์เดียว ระดับ 02 Prompt |
+| [05-context.md](05-context.md) | `../05-context.html` — ยกของที่ซ้ำไปไว้ในไฟล์เดียว ระดับ 03 Context |
 
 ## สิ่งที่ใช้ร่วมกันทุกสไลด์ (อ่านก่อน)
 

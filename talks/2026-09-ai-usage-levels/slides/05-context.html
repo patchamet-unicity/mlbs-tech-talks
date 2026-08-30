@@ -1,0 +1,1293 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ระดับ 03 — Context</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="theme.css">
+<style>
+/* ============================================================
+   สไลด์ 5 — "ระดับ 03 Context"
+
+   ต่อจากสไลด์ 4 โดยตรง: เอาพรอมต์ยาวใบเดิมมาผ่าเป็นสองกอง
+   กองที่เหมือนกันทุกเคส ถูกยกออกไปเขียนเป็น "ไฟล์ context ใบเดียว"
+   แล้วตั๋วใบใหม่ก็ถามสั้นๆ ได้ เพราะไฟล์ถูกแนบไปด้วยทุกครั้ง
+
+   ใจความ: ระดับ 02 คือ "พิมพ์ให้ครบ" — ระดับ 03 คือ "ไม่ต้องพิมพ์อีกแล้ว
+   เพราะมันอยู่ในไฟล์" ข้อความสั้นลง แต่ผลดีขึ้น ซึ่งหักมุขของสไลด์ 4 พอดี
+
+   *** ไฟล์เดียวเท่านั้น *** (ตัดสินใจ 2026-08-30)
+   เวอร์ชันก่อนหน้าทำเป็นชั้นวางที่มีการ์ดหลายใบ + ซ็อกเก็ตต่อ DB/log
+   กับแผงชื่อเครื่องมือ (Claude Code / Codex / Cursor) — ตีกลับทั้งชุด
+   ระดับ 03 ต้องเป็นแค่ "คุณเขียนไฟล์ไว้ใบเดียว แล้วมันถูกแนบไปทุกครั้ง"
+   เรื่อง DB / log / API อยู่ในไฟล์ในฐานะ *ที่อยู่ของของ* ไม่ใช่ท่อที่ต่อจริง
+   -> อย่าเอาชั้นวางหลายชิ้น / ซ็อกเก็ต / ชื่อเครื่องมือ กลับมา
+
+   หมัดเด็ดของสไลด์นี้อยู่ที่ beat 3: ประโยคที่พิมพ์คือ
+   "ออเดอร์ ORD123 ลูกค้ากดยืนยันไม่ผ่านครับ ระบบขึ้น ERROR 00412"
+   ซึ่งเป็นข้อความแรกของสไลด์ 3 คำต่อคำ — ประโยคเดียวกันเป๊ะ ตอนนั้นโดนเดาผิด 4 รอบ
+   มาคราวนี้ถูกตั้งแต่คำตอบแรก => คนไม่ได้เก่งขึ้น AI ก็ตัวเดิม ของรอบตัวมันเปลี่ยน
+   *** ห้ามแก้ประโยคนี้ให้ต่างจากสไลด์ 3 เด็ดขาด มุกทั้งสไลด์อยู่ตรงนี้ ***
+
+   มุกรองที่ทำให้ "ไฟล์เดียวพอ" จับต้องได้:
+   ตอน AI ตอบ บรรทัดในไฟล์ที่มันหยิบไปใช้จะไฮไลต์ค้างไว้
+   ตั๋วใบ 1 ใช้ DB + validate.js + ขั้นตอน 2,3 / ตั๋วใบ 2 ใช้ Log + API + ขั้นตอน 1,2
+   ไฟล์เดียวกันเป๊ะ ไม่ได้แก้อะไรเลย แต่คนละบรรทัดถูกใช้
+
+   6 beat (หนึ่งบีตหนึ่งความคิด)
+     1  พรอมต์ยาวจากระดับ 02 ผ่าสองสี — เฉพาะเคสนี้ / เหมือนกันทุกเคส
+     2  กองที่ซ้ำถูกยกออกไปเป็นไฟล์ context ฝั่งซ้าย เนื้อในทยอยขึ้นทีละบล็อก
+     3  ตั๋วใหม่ ถามประโยคเดียว (callback สไลด์ 3) ไฟล์ถูกแนบไปเอง
+     4  ได้ root cause ตั้งแต่คำตอบแรก + ไฮไลต์บรรทัดที่ใช้
+     5  ตั๋วใบที่สอง อาการคนละแบบ ไฟล์เดิมไม่ได้แก้ แต่ใช้คนละบรรทัด
+     6  ตั๋วใบ 3-4-5 ซ้อนรออยู่ + บรรทัดกันโกง ส่งไม้ต่อสไลด์ agent harness
+   ============================================================ */
+
+html, body {
+  height: 100%;
+  margin: 0;
+  background: var(--ground);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  user-select: none;
+}
+
+.stage {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  width: 1280px;
+  height: 720px;
+  transform: translate(-50%, -50%) scale(var(--stage-scale, 1));
+  transform-origin: center center;
+  overflow: hidden;
+  background: var(--ground);
+}
+
+/* ตอน rebuild (ถอยหลัง / รีเซ็ต) ต้องไม่มีอนิเมชันหลงเหลือ */
+.stage.is-jump *, .stage.is-jump *::before, .stage.is-jump *::after {
+  transition: none !important;
+  animation: none !important;
+}
+
+/* ---- หัวสไลด์ ---- */
+.head {
+  position: absolute;
+  left: 50%;
+  top: 22px;
+  transform: translateX(-50%);
+  padding: 10px 36px;
+  background: var(--ground-light);
+  border: 4px solid var(--ink);
+  box-shadow: inset 0 0 0 3px var(--ground-light), inset 0 0 0 4px var(--ash);
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 28px;
+  letter-spacing: .02em;
+  line-height: 1.2;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+/* ============================================================
+   พื้นที่เนื้อหา y 96..492
+   ซ้าย  ไฟล์ context x 60..560  (กว้าง 500)
+   ขวา   หน้าต่างแชท  x 600..1220 (กว้าง 620)
+   ============================================================ */
+.pane {
+  position: absolute;
+  top: 96px;
+  height: 396px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  background: var(--ground-light);
+  border: 4px solid var(--ink);
+}
+.pane .bar {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  height: 30px;
+  padding: 0 12px;
+  box-sizing: border-box;
+  background: var(--sign);
+  border-bottom: 4px solid var(--ink);
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 15px;
+  color: var(--ink);
+  white-space: nowrap;
+}
+.pane .bar b { width: 9px; height: 9px; background: var(--ink); opacity: .55; }
+.pane .bar .n {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: .06em;
+  opacity: .7;
+}
+.pane .bar .fn { font-family: var(--font-mono); font-weight: 600; font-size: 13.5px; }
+
+/* ---- ซ้าย: ไฟล์ context ---- */
+.file {
+  left: 60px;
+  width: 500px;
+  opacity: 0;
+  transition: opacity .4s ease-out;
+}
+.file.is-on { opacity: 1; }
+
+.doc {
+  flex: 1 1 auto;
+  padding: 9px 15px 4px;
+  box-sizing: border-box;
+  overflow: hidden;
+  font-family: var(--font-body);
+  font-weight: 300;
+  font-size: 12px;
+  line-height: 1.38;
+  color: var(--ink);
+}
+/* บล็อกในไฟล์โผล่ทีละก้อนตอน beat 2 */
+.blk { opacity: 0; transition: opacity .35s ease-out; }
+.blk.is-on { opacity: 1; }
+
+.dh {
+  font-weight: 600;
+  font-size: 15px;
+  line-height: 1.3;
+  padding-bottom: 5px;
+  border-bottom: 2px solid var(--ash);
+}
+.dp { margin: 5px 0 0; }
+.dp b { font-family: var(--font-mono); font-weight: 600; font-size: 12px; }
+/* หัวข้อย่อยในไฟล์ — ป้ายกำกับโครงสร้าง คือภาษาภาพที่กันไว้ให้สไลด์นี้ */
+.ds {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 0 4px;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: .12em;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+.ds::after { content: ""; flex: 1; height: 2px; background: var(--ash); opacity: .5; }
+
+.dul, .dol { margin: 0; padding: 0; list-style: none; }
+.dol { counter-reset: st; }
+
+/* บรรทัดที่ AI หยิบไปใช้จะติดไฮไลต์ค้างไว้ */
+.dl {
+  padding: 1px 6px;
+  margin-left: -6px;
+  background: transparent;
+  transition: background .3s ease-out;
+}
+.dl.is-hit { background: var(--frame); }
+
+.dl.addr { display: flex; align-items: baseline; gap: 10px; }
+.dl .dk { flex: 0 0 74px; color: var(--ink-soft); }
+.dl .dv { font-family: var(--font-mono); font-weight: 400; font-size: 11.5px; }
+
+.dol .dl {
+  position: relative;
+  padding-left: 22px;
+}
+.dol .dl::before {
+  counter-increment: st;
+  content: counter(st) ".";
+  position: absolute;
+  left: 6px;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 11px;
+  color: var(--ink-soft);
+}
+
+/* ---- ขวา: หน้าต่างแชท ---- */
+/* beat 1 ยังไม่มีไฟล์ เลยเลื่อนหน้าต่างมากลางเวทีก่อน ((1280-620)/2 = 330) */
+.pane-send {
+  left: 600px;
+  width: 620px;
+  transition: transform .55s cubic-bezier(.5, 0, .2, 1), opacity .4s ease-out;
+}
+.pane-send.is-wide { transform: translateX(-270px); }
+.pane-send.is-gone { opacity: 0; }
+
+.viewport {
+  position: relative;
+  flex: 1 1 auto;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(to bottom,
+    transparent 0, #000 26px, #000 100%);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 26px, #000 100%);
+}
+.feed {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 12px 16px;
+  box-sizing: border-box;
+}
+
+.msg { display: flex; padding-top: 12px; }
+.msg:first-child { padding-top: 0; }
+.msg.you { justify-content: flex-end; }
+.msg .col { display: flex; flex-direction: column; width: 100%; }
+.msg.ai .col { width: auto; max-width: 94%; }
+.msg.you .col { align-items: flex-end; width: auto; max-width: 94%; }
+
+.who {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+  padding: 0 2px;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: .16em;
+  color: var(--ink-soft);
+}
+/* avatar ชุดเดียวกับสไลด์ 3–4 — ตา/ปากคือช่องว่างที่ไม่ได้วาด */
+.av {
+  flex: 0 0 auto;
+  display: block;
+  width: 20px;
+  height: 20px;
+  color: var(--ink-soft);
+  opacity: .85;
+}
+
+.bub {
+  box-sizing: border-box;
+  padding: 9px 14px 11px;
+  border: 3px solid var(--ink);
+  background: var(--ground-light);
+  font-family: var(--font-body);
+  font-weight: 300;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--ink);
+}
+.msg.you .bub { background: var(--frame); }
+.msg.ai .bub { font-size: 14px; }
+.bub p { margin: 0; }
+.bub p + p { margin-top: 6px; }
+.bub b { font-weight: 500; }
+.bub .fix {
+  margin-top: 7px;
+  padding-left: 11px;
+  border-left: 3px solid var(--ash);
+  font-size: 13px;
+}
+
+/* ---- beat 1: พรอมต์ระดับ 02 ผ่าสองกอง ---- */
+/* ฟองพรอมต์กินเต็มความกว้าง และพื้นอ่อนลง เพื่อให้กอง keep ที่เป็นครีมเด้งออกมา
+   ไม่งั้นครีมทับครีมมองไม่ออก (ฟองฝั่งเราพื้นครีมอยู่แล้ว) */
+.msg.split .col { width: 100%; max-width: none; }
+.msg.split .bub { width: 100%; background: var(--ground-light); }
+
+.grp {
+  padding: 7px 0 7px 12px;
+  border-left: 4px solid var(--ash);
+}
+.grp + .grp { margin-top: 10px; }
+.grp .tag {
+  display: block;
+  margin-bottom: 4px;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: .12em;
+  color: var(--ink-soft);
+}
+/* กองที่ยกออกไปได้ = จุดเดียวที่ใช้ --accent ในสไลด์นี้ */
+.grp.keep {
+  border-left-color: var(--accent);
+  background: var(--frame);
+  overflow: hidden;
+  max-height: 220px;
+  transition: opacity .3s ease-out, max-height .5s cubic-bezier(.16, 1, .3, 1),
+              margin-top .5s cubic-bezier(.16, 1, .3, 1),
+              padding .5s cubic-bezier(.16, 1, .3, 1);
+}
+.grp.keep .tag { color: var(--accent); }
+.grp.keep.is-off {
+  opacity: 0;
+  max-height: 0;
+  margin-top: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+.grp ul { margin: 3px 0 0; padding: 0; list-style: none; }
+.grp li { position: relative; padding-left: 15px; }
+.grp li::before {
+  content: "";
+  position: absolute;
+  left: 3px;
+  top: 9px;
+  width: 5px;
+  height: 5px;
+  background: var(--ink);
+  opacity: .55;
+}
+
+/* ---- ไฟล์ที่ถูกแนบไปกับข้อความ ---- */
+.atc {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 9px;
+  padding-top: 8px;
+  border-top: 2px solid var(--ash);
+}
+.atc .al {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 10.5px;
+  letter-spacing: .1em;
+  color: var(--ink-soft);
+}
+.chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 9px 3px;
+  background: var(--ground-light);
+  border: 2px solid var(--ink);
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--ink);
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateY(5px);
+  transition: opacity .26s ease-out, transform .26s cubic-bezier(.16, 1, .3, 1);
+}
+.chip.is-on { opacity: 1; transform: translateY(0); }
+/* ไอคอนไฟล์ปั้นเอง 3 ขีด ไม่ใช้ emoji */
+.chip .fi {
+  flex: 0 0 auto;
+  width: 8px;
+  height: 10px;
+  border: 2px solid var(--ink);
+  border-top-width: 4px;
+}
+
+/* micro loop: AI กำลังคิด */
+.dots { display: flex; align-items: center; gap: 7px; height: 22px; }
+.dots i {
+  width: 8px;
+  height: 8px;
+  background: var(--ink-soft);
+  opacity: .3;
+  animation: dotPulse 1.5s steps(1, end) infinite;
+}
+.dots i:nth-child(2) { animation-delay: .3s; }
+.dots i:nth-child(3) { animation-delay: .6s; }
+@keyframes dotPulse { 0%, 60% { opacity: .85 } 61%, 100% { opacity: .25 } }
+
+/* ---- beat 6: ตั๋วที่เหลือซ้อนรออยู่ ทับพื้นที่หน้าต่างแชท ---- */
+.more {
+  position: absolute;
+  left: 600px;
+  top: 96px;
+  width: 620px;
+  height: 396px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 13px;
+  padding: 0 46px;
+  pointer-events: none;
+}
+.tk {
+  padding: 11px 15px 12px;
+  box-sizing: border-box;
+  background: var(--ground-light);
+  border: 4px solid var(--ink);
+  font-family: var(--font-body);
+  font-weight: 300;
+  font-size: 13.5px;
+  line-height: 1.4;
+  color: var(--ink);
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity .38s ease-out, transform .38s cubic-bezier(.16, 1, .3, 1);
+}
+.tk.is-on { opacity: 1; transform: translateY(0); }
+.tk .tl {
+  display: block;
+  margin-bottom: 3px;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 10.5px;
+  letter-spacing: .12em;
+  color: var(--ink-soft);
+}
+.more .dotdot {
+  text-align: center;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 22px;
+  letter-spacing: .3em;
+  color: var(--ink-soft);
+  opacity: 0;
+  transition: opacity .38s ease-out;
+}
+.more .dotdot.is-on { opacity: .8; }
+
+/* ---- บรรทัดคำบรรยาย y 500..556 ---- */
+.cap {
+  position: absolute;
+  left: 60px;
+  right: 60px;
+  top: 500px;
+  text-align: center;
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 20px;
+  line-height: 1.3;
+  color: var(--ink-soft);
+}
+.cap .sub {
+  display: block;
+  margin-top: 3px;
+  font-weight: 300;
+  font-size: 14px;
+  line-height: 1.25;
+  opacity: .85;
+}
+.cap .big {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 24px;
+  color: var(--ink);
+}
+
+/* ============================================================
+   ฉากล่าง y 556..720 (สูง 164 — ค่าแนวตั้งชุดเดียวกับสไลด์ 4)
+
+   ต่างจากสไลด์ 4 ตรงที่คน "ไม่ต้องพิมพ์ยาว" อีกแล้ว พูดคำเดียวจบ
+   แล้วหุ่นเข้าตู้ไปเปิด "ตู้เก็บของ" อ่านเอาเอง (= ไฟล์ context)
+   ทั้งฉาก (ตู้เก็บของ→คน) กิน x 302..978 กึ่งกลาง 640 = กลางเวทีพอดี
+   ขยับค่าไหนต้องเลื่อนทั้งชุดพร้อมกัน
+   ============================================================ */
+.scene {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 164px;
+}
+.scene .floor {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 18px;
+  height: 3px;
+  background: var(--ash);
+  opacity: .5;
+}
+
+/* ---- ตู้เก็บของ = ไฟล์ context ในเวอร์ชันจิ๋ว ---- */
+.store {
+  position: absolute;
+  left: 302px;
+  bottom: 18px;
+  width: 68px;
+  height: 92px;
+  box-sizing: border-box;
+  padding: 7px 6px 0;
+  background: var(--ground-light);
+  border: 4px solid var(--ink);
+  z-index: 2;
+}
+.store i {
+  display: block;
+  height: 13px;
+  margin-bottom: 6px;
+  background: var(--ground);
+  border: 2px solid var(--ink);
+  opacity: .5;
+}
+.store.is-read i { animation: storeRead 1.5s steps(1, end) infinite; }
+.store.is-read i:nth-child(2) { animation-delay: .5s; }
+.store.is-read i:nth-child(3) { animation-delay: 1s; }
+@keyframes storeRead {
+  0%, 32% { background: var(--frame); opacity: 1 }
+  33%, 100% { background: var(--ground); opacity: .5 }
+}
+
+/* ---- ตู้ rack (ชุดเดียวกับสไลด์ 3–4) ---- */
+.rack {
+  position: absolute;
+  left: 382px;
+  bottom: 18px;
+  width: 86px;
+  height: 120px;
+  box-sizing: border-box;
+  background: var(--ground-light);
+  border: 4px solid var(--ink);
+  overflow: hidden;
+  z-index: 2;
+}
+.rack .rcap {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 5px;
+  height: 16px;
+  padding-right: 7px;
+  background: var(--sign);
+  border-bottom: 4px solid var(--ink);
+}
+.rack .rcap i { width: 5px; height: 5px; background: var(--ink); opacity: .45; }
+
+.bays { padding: 7px 7px 0; }
+.bay {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  height: 16px;
+  margin-bottom: 5px;
+  padding: 0 5px;
+  box-sizing: border-box;
+  background: var(--ground);
+  border: 2px solid var(--ink);
+}
+.bay .led {
+  width: 5px;
+  height: 5px;
+  background: var(--grass-deep);
+  opacity: .35;
+  animation: ledIdle 3.4s steps(1, end) infinite;
+}
+.bay:nth-child(2) .led { animation-delay: .9s; }
+.bay:nth-child(3) .led { animation-delay: 1.8s; }
+.bay:nth-child(4) .led { animation-delay: 2.5s; }
+.bay .vent { flex: 1; height: 4px; background: var(--ink); opacity: .22; }
+@keyframes ledIdle { 0%, 12% { opacity: 1 } 13%, 100% { opacity: .3 } }
+
+.rack.is-busy .bay .led { animation: ledBusy .48s steps(1, end) infinite; }
+.rack.is-busy .bay:nth-child(2) .led { animation-delay: .12s; }
+.rack.is-busy .bay:nth-child(3) .led { animation-delay: .3s; }
+.rack.is-busy .bay:nth-child(4) .led { animation-delay: .2s; }
+@keyframes ledBusy { 0%, 49% { opacity: 1 } 50%, 100% { opacity: .25 } }
+
+.rack .scan {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 4px;
+  background: var(--grass-deep);
+  opacity: 0;
+}
+.rack.is-busy .scan { animation: rackScan 1.5s linear infinite; }
+@keyframes rackScan {
+  0%   { transform: translateY(16px); opacity: 0 }
+  12%  { opacity: .75 }
+  88%  { opacity: .75 }
+  100% { transform: translateY(112px); opacity: 0 }
+}
+
+/* ---- ตัวละคร 30% ของสไลด์ 1 (ชุดเดียวกับสไลด์ 3–4) ---- */
+.pawn {
+  position: absolute;
+  z-index: 1;
+  --char-size: 60px;
+  bottom: 18px;
+  left: 0;
+  transform: translateX(var(--x, 0));
+  opacity: 1;
+  transition: opacity .22s linear;
+}
+.pawn .char { height: var(--char-size); }
+.pawn.is-hidden { opacity: 0; }
+.pawn-bot { transition: transform var(--walk, 2s) linear, opacity .22s linear; }
+
+.say {
+  position: absolute;
+  left: 50%;
+  bottom: calc(var(--char-size) + 9px);
+  transform: translateX(-50%) scale(.7);
+  padding: 4px 10px 5px;
+  background: var(--ground-light);
+  border: 3px solid var(--ink);
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 1.2;
+  color: var(--ink);
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity .16s ease-out, transform .16s cubic-bezier(.16, 1, .3, 1);
+}
+.say::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -12px;
+  margin-left: -5px;
+  width: 9px;
+  height: 9px;
+  background: var(--ground-light);
+  border-right: 3px solid var(--ink);
+  border-bottom: 3px solid var(--ink);
+}
+.say.is-on { opacity: 1; transform: translateX(-50%) scale(1); }
+.say.is-emo { font-family: var(--font-body); font-size: 19px; padding: 2px 10px 4px; }
+
+/* ---- ตัวบอกว่ารอคลิก ---- */
+.wait {
+  position: absolute;
+  left: 50%;
+  bottom: 11px;
+  transform: translateX(-50%);
+  font-family: var(--font-mono);
+  font-size: 17px;
+  color: var(--ink);
+  opacity: 0;
+}
+.stage.is-waiting .wait {
+  animation: waitIn .3s ease-out both, waitBlink 1.25s steps(1, end) .3s infinite;
+}
+@keyframes waitIn    { from { opacity: 0 } to { opacity: 1 } }
+@keyframes waitBlink { 0%, 55% { opacity: 1 } 56%, 100% { opacity: 0 } }
+
+/* ---- ปุ่มควบคุม มุมล่างขวา (ชุดเดียวกับสไลด์ 1–4) ---- */
+.controls {
+  position: absolute;
+  right: 16px;
+  bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  z-index: 5;
+}
+.controls button {
+  padding: 7px 9px;
+  background: none;
+  border: 0;
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: .08em;
+  line-height: 1;
+  cursor: pointer;
+  opacity: .28;
+  transition: opacity .15s;
+}
+.controls button:hover,
+.controls button:focus-visible { opacity: .95; outline: none; }
+.controls button[aria-pressed="true"] {
+  opacity: .95;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-thickness: 2px;
+}
+.controls button:disabled { opacity: .1; cursor: default; }
+
+.count {
+  padding: 0 7px;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: .08em;
+  color: var(--ink);
+  opacity: .28;
+  transition: opacity .15s;
+}
+.controls:hover .count { opacity: .95; }
+
+/* ---- exit ---- */
+.blink {
+  position: fixed;
+  inset: 0;
+  background: var(--ink);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 99;
+}
+.blink.is-out { animation: doorBlink .62s steps(1, end) forwards; }
+@keyframes doorBlink {
+  0% { opacity: 0 } 14% { opacity: 1 } 28% { opacity: 0 }
+  42% { opacity: 1 } 56% { opacity: 0 } 70% { opacity: 1 } 100% { opacity: 1 }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pane, .pane-send, .file, .blk, .dl, .chip, .grp.keep, .tk, .more .dotdot,
+  .msg { transition: none !important; }
+  .dots i, .store.is-read i { animation: none; }
+  .pawn, .pawn-bot, .say { transition: none; }
+  .bay .led, .rack .scan { animation: none; }
+  .stage.is-waiting .wait { animation: none; opacity: 1; }
+  .blink.is-out { animation: none; opacity: 1; }
+}
+</style>
+</head>
+<body>
+
+<div class="stage" id="stage">
+  <div class="head">ระดับ 03 — Context</div>
+
+  <div class="pane file" id="file">
+    <div class="bar"><b></b><span class="fn">context/order-error.md</span><span class="n" id="file-n">แนบทุกครั้ง</span></div>
+    <div class="doc">
+      <div class="blk" id="b-head">
+        <div class="dh">ไล่หา root cause ของ order error</div>
+        <p class="dp">order service บน production — Node + Postgres · repo <b>order-api</b></p>
+      </div>
+
+      <div class="blk" id="b-addr">
+        <div class="ds">ที่อยู่ของของ</div>
+        <ul class="dul">
+          <li class="dl addr" id="d-web"><span class="dk">หน้าเว็บ</span><span class="dv">shop.example.com/checkout</span></li>
+          <li class="dl addr" id="d-api"><span class="dk">API</span><span class="dv">api.example.com/v1/orders</span></li>
+          <li class="dl addr" id="d-log"><span class="dk">Log</span><span class="dv">Grafana &rarr; "order-api (prod)"</span></li>
+          <li class="dl addr" id="d-db"><span class="dk">DB</span><span class="dv">pg-prod · orders, customers, zones</span></li>
+          <li class="dl addr" id="d-code"><span class="dk">โค้ดที่ตรวจ</span><span class="dv">order-api/validate.js</span></li>
+          <li class="dl addr" id="d-team"><span class="dk">ทีมที่เกี่ยวข้อง</span><span class="dv">คลังสินค้า · ขนส่ง · ราคา/โปรโมชัน</span></li>
+        </ul>
+      </div>
+
+      <div class="blk" id="b-step">
+        <div class="ds">ขั้นตอนที่ให้ไล่</div>
+        <ol class="dol">
+          <li class="dl" id="d-s1">อ่าน log ช่วงเวลาที่ลูกค้าแจ้ง หา error หรือ timeout</li>
+          <li class="dl" id="d-s2">เทียบกับข้อมูลของลูกค้ารายนั้นใน DB ไม่ใช่ดูภาพรวม</li>
+          <li class="dl" id="d-s3">ถ้ารายอื่นปกติ ให้สงสัยข้อมูลของรายนั้นก่อน ไม่ใช่โค้ด</li>
+          <li class="dl" id="d-s4">ถ้าข้อมูลไม่พอ ให้ขอเพิ่ม อย่าเดา</li>
+        </ol>
+      </div>
+
+      <div class="blk" id="b-fmt">
+        <div class="ds">ตอบกลับมาเป็น</div>
+        <p class="dp dl" id="d-fmt">บอกสาเหตุเป็นภาษาธุรกิจก่อน แล้วค่อยแนบหลักฐานทางเทคนิค<br>แล้วแยกเป็น วิธีแก้เฉพาะหน้า / ระยะยาว / ทีมที่ต้องลงมือ</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="pane pane-send" id="send">
+    <div class="bar"><b></b><span id="send-t">พรอมต์ที่ส่งไปในระดับ 02</span><span class="n" id="send-n">1 ข้อความ</span></div>
+    <div class="viewport"><div class="feed" id="feed"></div></div>
+  </div>
+
+  <div class="more" id="more">
+    <div class="tk" id="tk-0"><span class="tl">ตั๋วใบที่ 3</span>ORD311 ลูกค้าจ่ายเงินแล้ว แต่ออเดอร์ไม่ขึ้นในระบบ</div>
+    <div class="tk" id="tk-1"><span class="tl">ตั๋วใบที่ 4</span>ORD402 ยอดในใบเสร็จไม่ตรงกับที่ลูกค้ากดสั่ง</div>
+    <div class="tk" id="tk-2"><span class="tl">ตั๋วใบที่ 5</span>ORD503 กดยกเลิกออเดอร์แล้วขึ้น error 00503</div>
+    <div class="dotdot" id="tk-dot">···</div>
+  </div>
+
+  <div class="cap" id="cap"></div>
+
+  <div class="scene" id="scene">
+    <div class="floor"></div>
+    <div class="store" id="store"><i></i><i></i><i></i></div>
+    <div class="rack" id="rack">
+      <div class="rcap"><i></i><i></i></div>
+      <div class="bays">
+        <div class="bay"><span class="led"></span><span class="vent"></span></div>
+        <div class="bay"><span class="led"></span><span class="vent"></span></div>
+        <div class="bay"><span class="led"></span><span class="vent"></span></div>
+        <div class="bay"><span class="led"></span><span class="vent"></span></div>
+      </div>
+      <div class="scan"></div>
+    </div>
+    <div class="pawn pawn-bot" id="bot">
+      <div class="say" id="bot-say"></div>
+      <div class="sprite" data-char="robot-right"></div>
+    </div>
+    <div class="pawn pawn-you" id="guy">
+      <div class="say" id="guy-say"></div>
+      <div class="sprite" data-char="human"></div>
+    </div>
+  </div>
+
+  <div class="wait">&#9660;</div>
+
+  <div class="controls" id="controls">
+    <button type="button" id="btn-prev"  title="ถอยหลังหนึ่งจังหวะ (←)">&#9664;</button>
+    <button type="button" id="btn-next"  title="จังหวะถัดไป (→ / Space)">&#9654;</button>
+    <div class="count" id="count" title="จังหวะที่เท่าไหร่">0/6</div>
+    <button type="button" id="btn-reset" title="เริ่มสไลด์นี้ใหม่ (R)">&#8635;</button>
+    <button type="button" id="btn-auto"  title="เดินหน้าเองอัตโนมัติ" aria-pressed="false">AUTO</button>
+  </div>
+</div>
+
+<div class="blink" id="blink"></div>
+
+<script src="../../assets/characters/characters.js"></script>
+<script>
+(function () {
+  "use strict";
+
+  var NEXT = "06-agent.html";             /* ยังไม่มีไฟล์นี้ */
+  var PREV = "04-prompt.html";
+
+  /* ---- avatar 13x13 ชุดเดียวกับสไลด์ 3–4 ---- */
+  var AVATARS = {
+    human: [[4, 1, 5, 1], [3, 2, 1, 1], [9, 2, 1, 1], [2, 3, 1, 3], [10, 3, 1, 3],
+            [4, 4, 1, 1], [8, 4, 1, 1], [3, 6, 1, 1], [9, 6, 1, 1], [5, 6, 3, 1],
+            [4, 7, 5, 1], [5, 8, 1, 1], [7, 8, 1, 1], [3, 9, 2, 1], [8, 9, 2, 1],
+            [2, 10, 1, 1], [10, 10, 1, 1], [1, 11, 1, 1], [11, 11, 1, 1], [1, 12, 11, 1]],
+    robot: [[5, 0, 3, 1], [6, 1, 1, 1], [2, 2, 9, 1], [2, 8, 9, 1],
+            [2, 3, 1, 5], [10, 3, 1, 5], [4, 4, 2, 2], [7, 4, 2, 2], [4, 7, 5, 1],
+            [5, 9, 3, 1], [1, 10, 11, 1], [1, 11, 1, 1], [11, 11, 1, 1], [1, 12, 11, 1]]
+  };
+  function avatar(name) {
+    return '<svg class="av" viewBox="0 0 13 13" shape-rendering="crispEdges" aria-hidden="true">' +
+           AVATARS[name].map(function (r) {
+             return '<rect x="' + r[0] + '" y="' + r[1] + '" width="' + r[2] +
+                    '" height="' + r[3] + '" fill="currentColor"/>';
+           }).join("") + '</svg>';
+  }
+  function whoRow(who) {
+    return '<div class="who">' +
+           (who === "ai" ? avatar("robot") + "<span>AI</span>"
+                         : "<span>คุณ</span>" + avatar("human")) +
+           '</div>';
+  }
+
+  /* ============================================================
+     beat 1 — พรอมต์ใบเดิมจากสไลด์ 4 ผ่าเป็นสองกอง
+     กอง once = ของเฉพาะเคสนี้ / กอง keep = ของที่เหมือนกันทุกเคส
+     กอง keep คือสิ่งที่จะกลายเป็นไฟล์ context ในบีตถัดไป
+     ============================================================ */
+  var PROMPT =
+    '<div class="grp once"><span class="tag">เฉพาะเคสนี้</span>' +
+      '<p>ออเดอร์ ORD123 ของลูกค้ารายหนึ่งกดยืนยันไม่ผ่าน ระบบขึ้น ERROR 00412</p>' +
+      '<ul>' +
+        '<li>ของในคลังมี 200 ชิ้น / ล้าง cache ราคาแล้วอาการเหมือนเดิม</li>' +
+        '<li>กรอกครบ ที่อยู่ก็ใส่แล้ว error เด้งตอนกดยืนยัน</li>' +
+        '<li>ลูกค้ารายอื่นสั่งตัวเดียวกันได้ รายนี้รายเดียวที่ไม่ได้</li>' +
+        '<li>(แนบ log + โค้ด validate.js:88)</li>' +
+      '</ul></div>' +
+    '<div class="grp keep" id="keep"><span class="tag">เหมือนกันทุกเคส</span>' +
+      '<p>ระบบคือ order service บน production — Node + Postgres repo <b>order-api</b> ' +
+      'log อยู่ที่ Grafana ข้อมูลลูกค้าอยู่ที่ pg-prod ทีมที่เกี่ยวข้อง: คลัง / ขนส่ง / ราคา</p>' +
+      '<p>ช่วยไล่หาสาเหตุที่แท้จริงให้ครับ เทียบกับข้อมูลของลูกค้ารายนั้นด้วย ' +
+      'ถ้าข้อมูลไม่พออย่าเพิ่งเดา ให้ขอเพิ่มได้</p>' +
+      '<p>ตอบเป็นภาษาธุรกิจก่อน แล้วค่อยแนบหลักฐานทางเทคนิค ' +
+      'แล้วแยกเป็น วิธีแก้เฉพาะหน้า / ระยะยาว / ทีมที่ต้องลงมือ</p></div>';
+
+  /* ============================================================
+     ตั๋วใบที่ 1 — ประโยคเดียวกับข้อความแรกของสไลด์ 3 คำต่อคำ
+     *** ห้ามแก้ให้ต่างจากสไลด์ 3 มุกทั้งสไลด์อยู่ตรงนี้ ***
+     ============================================================ */
+  var Q1 = "ออเดอร์ ORD123 ลูกค้ากดยืนยันไม่ผ่านครับ ระบบขึ้น ERROR 00412";
+
+  var FILECHIP =
+    '<div class="atc"><span class="al">แนบไปด้วยเสมอ</span>' +
+      '<span class="chip" id="k-file"><span class="fi"></span>context/order-error.md</span>' +
+    '</div>';
+
+  var A1 =
+    '<p>ตามขั้นตอนในไฟล์ ผมเทียบข้อมูลของลูกค้ารายนี้ใน pg-prod แล้วครับ — ORD123 ไม่ผ่านเพราะ ' +
+    '<b>ที่อยู่ของรายนี้อยู่นอกพื้นที่จัดส่งที่ระบบรู้จัก</b> ไม่ใช่ลูกค้ากรอกอะไรผิด</p>' +
+    '<p>หลักฐาน: รหัสไปรษณีย์ 57130 ยังไม่มีในตาราง zones · ค่าส่งเลยเป็น NaN ยอดรวมก็เป็น NaN ' +
+    'ทั้งก้อน · validate.js:88 เช็ค grandTotal > 0 ซึ่ง NaN ได้ false เสมอ เลยโยน 00412 ออกมา</p>' +
+    '<p class="fix">เฉพาะหน้า: เพิ่มรหัสไปรษณีย์เข้าตารางโซน แล้วให้ลูกค้ากดยืนยัน ORD123 ใหม่<br>' +
+    'ระยะยาว: ถ้าหาโซนไม่เจอ ต้องบอกว่ายังไม่รองรับพื้นที่นี้ แทนรหัส 00412 ลอยๆ<br>' +
+    'ทีมที่ต้องลงมือ: ทีมขนส่ง</p>';
+
+  /* ตั๋วใบที่ 2 — จงใจเลือกอาการที่ "ไม่มี error"
+     เพื่อให้ AI ต้องใช้บรรทัดอื่นในไฟล์เดิม (Log + API + ขั้นตอน 1)
+     ไม่ใช่บรรทัดชุดเดิมกับใบแรก */
+  var Q2 = "อีกเคสครับ ORD208 ลูกค้ากด checkout แล้วค้าง ไม่ขึ้น error อะไรเลย";
+
+  var A2 =
+    '<p><b>ลูกค้าไม่ได้ทำอะไรผิด ออเดอร์ใหญ่เกินกว่าที่ระบบคำนวณทัน</b> — ORD208 มี 214 รายการ ' +
+    'ระบบไล่ดึงราคาทีละรายการ รวม 214 ครั้ง ใช้เวลาเกิน 30 วินาที ระบบชำระเงินตัดก่อน ' +
+    'หน้าจอเลยค้างโดยไม่มีข้อความอะไรขึ้น</p>' +
+    '<p>หลักฐาน: log ที่ Grafana ช่วงที่ลูกค้าแจ้ง request ค้างที่ /v1/orders แล้วถูกตัดที่ 30 วิ</p>' +
+    '<p class="fix">เฉพาะหน้า: ให้ลูกค้าแยกเป็นสองออเดอร์<br>' +
+    'ระยะยาว: รวมการดึงราคาเป็นครั้งเดียว แล้วขึ้นข้อความบอกลูกค้าแทนจอค้าง<br>' +
+    'ทีมที่ต้องลงมือ: ทีมราคา/โปรโมชัน</p>';
+
+  /* บรรทัดในไฟล์ที่ AI หยิบไปใช้ — คนละชุดกันสองใบ ทั้งที่ไฟล์ไม่ได้ถูกแก้เลย */
+  var HL = {
+    a: ["d-db", "d-code", "d-team", "d-s2", "d-s3", "d-fmt"],
+    b: ["d-log", "d-api", "d-team", "d-s1", "d-s2", "d-fmt"]
+  };
+
+  var CAPS = [
+    "",
+    "พรอมต์ยาวๆ ของระดับ 02 มีของสองอย่างปนกันอยู่",
+    "ของที่เหมือนเดิมทุกครั้ง ย้ายไปเขียนไว้ในไฟล์เดียว เขียนครั้งเดียวพอ",
+    'ตั๋วใบใหม่ พิมพ์แค่ประโยคเดียว ไฟล์ถูกแนบไปด้วยเอง' +
+      '<span class="sub">ประโยคนี้คือข้อความแรกของระดับ 01 คำต่อคำ — ตอนนั้นได้คำเดาผิดกลับมา 4 รอบ</span>',
+    "ข้อความสั้นกว่าระดับ 02 ด้วยซ้ำ แต่ได้สาเหตุที่แท้จริงตั้งแต่คำตอบแรก",
+    'ตั๋วใบใหม่ คนละอาการ ไฟล์เดิมไม่ได้แก้อะไรเลย' +
+      '<span class="sub">สังเกตว่าบรรทัดที่มันหยิบไปใช้เปลี่ยนไปเอง — ใบแรกใช้ DB กับโค้ด ใบนี้ใช้ log กับ API</span>',
+    '<span class="big">เขียนไฟล์เดียว</span> ใช้ได้กับทุกใบถัดไป' +
+      '<span class="sub">แต่ไฟล์ไม่ได้เขียนตัวเอง ต้องมีคนเขียนและคอยอัปเดตเมื่อระบบเปลี่ยน — ' +
+      'และมันบอกได้แค่ว่าของอยู่ที่ไหน ใครจะไปหยิบมาให้ ยังเป็นอีกเรื่อง</span>'
+  ];
+
+  var BEATS = 6;
+  var AUTO_HOLD = [0, 4200, 5200, 5200, 6000, 7000, 9000];
+
+  var stage   = document.getElementById("stage");
+  var fileEl  = document.getElementById("file");
+  var sendEl  = document.getElementById("send");
+  var sendT   = document.getElementById("send-t");
+  var sendN   = document.getElementById("send-n");
+  var feed    = document.getElementById("feed");
+  var capEl   = document.getElementById("cap");
+  var blink   = document.getElementById("blink");
+  var embed   = window.parent !== window;
+  var reduce  = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  var BLKS = ["b-head", "b-addr", "b-step", "b-fmt"];
+  var TKS  = ["tk-0", "tk-1", "tk-2", "tk-dot"];
+
+  function el(id) { return document.getElementById(id); }
+
+  function fit() {
+    stage.style.setProperty("--stage-scale",
+      Math.min(window.innerWidth / 1280, window.innerHeight / 720));
+  }
+  fit();
+  window.addEventListener("resize", fit);
+
+  /* ไฮไลต์บรรทัดในไฟล์ — ล้างของเดิมทุกครั้งก่อน ไม่งั้นสองชุดจะทับกัน */
+  function hilite(set) {
+    [].slice.call(document.querySelectorAll(".dl")).forEach(function (d) {
+      d.classList.remove("is-hit");
+    });
+    if (!set) return;
+    HL[set].forEach(function (id) { el(id).classList.add("is-hit"); });
+  }
+
+  function msgEl(who, inner) {
+    var m = document.createElement("div");
+    m.className = "msg " + who;
+    m.innerHTML = '<div class="col">' + whoRow(who) +
+                  '<div class="bub">' + inner + '</div></div>';
+    return m;
+  }
+
+  /* ข้อความใหม่ดันกองขึ้น: เกิดมาพร้อม margin-top ติดลบเท่าความสูงตัวเอง
+     แล้ว transition กลับเป็น 0 (กลไกเดียวกับสไลด์ 3–4) */
+  function push(m) {
+    feed.appendChild(m);
+    var h = m.offsetHeight;
+    m.style.marginTop = -h + "px";
+    m.style.opacity = "0";
+    m.offsetHeight;                        /* บังคับ reflow ก่อนเปลี่ยนค่า */
+    m.style.transition = "margin-top .4s cubic-bezier(.16,1,.3,1), opacity .3s ease-out";
+    m.style.marginTop = "0px";
+    m.style.opacity = "1";
+    return m;
+  }
+
+  /* ---- beat state ---- */
+  var beat = 0, auto = false, leaving = false;
+  var timers = [];
+  function at(ms, fn) { timers.push(setTimeout(fn, reduce ? 0 : ms)); }
+  function clearTimers() { timers.forEach(clearTimeout); timers = []; }
+
+  /* วางสถานะของ beat n ตรงๆ ไม่มีอนิเมชัน — ใช้ตอนถอยหลัง/รีเซ็ต/reduce-motion */
+  function rebuild(n) {
+    stage.classList.add("is-jump");
+
+    fileEl.classList.toggle("is-on", n >= 2);
+    BLKS.forEach(function (id) { el(id).classList.toggle("is-on", n >= 2); });
+    hilite(n === 4 ? "a" : n >= 5 ? "b" : null);   /* บีต 3 ยังไม่ตอบ ยังไม่ต้องไฮไลต์ */
+
+    sendEl.classList.toggle("is-wide", n === 1);
+    sendEl.classList.toggle("is-gone", n >= 6);
+    sendT.textContent = n <= 2 ? "พรอมต์ที่ส่งไปในระดับ 02" : "IT Support — ตั๋วใบใหม่";
+    sendN.textContent = (n <= 3 ? 1 : n <= 4 ? 2 : 4) + " ข้อความ";
+
+    feed.innerHTML = "";
+    if (n <= 2) {
+      feed.appendChild(msgEl("you split", PROMPT));
+      el("keep").classList.toggle("is-off", n >= 2);
+    } else {
+      feed.appendChild(msgEl("you", Q1 + FILECHIP));
+      if (n >= 4) feed.appendChild(msgEl("ai", A1));
+      if (n >= 5) {
+        feed.appendChild(msgEl("you", Q2 + FILECHIP));
+        feed.appendChild(msgEl("ai", A2));
+      }
+      [].slice.call(feed.querySelectorAll(".chip")).forEach(function (c) {
+        c.classList.add("is-on");
+      });
+    }
+
+    TKS.forEach(function (id) { el(id).classList.toggle("is-on", n >= 6); });
+
+    stage.offsetHeight;                    /* บังคับ reflow ก่อนคืน transition */
+    stage.classList.remove("is-jump");
+  }
+
+  /* ---- beat 2: กอง keep ยุบหายจากฟอง แล้วกลายเป็นไฟล์ทีละบล็อก ---- */
+  function toFile() {
+    el("keep").classList.add("is-off");
+    sendEl.classList.remove("is-wide");
+    at(240, function () { fileEl.classList.add("is-on"); });
+    BLKS.forEach(function (id, i) {
+      at(400 + i * 230, function () { el(id).classList.add("is-on"); });
+    });
+  }
+
+  /* ---- beat 3: ตั๋วใหม่ ประโยคเดียว + ไฟล์ถูกแนบไปเอง ---- */
+  function ticket1() {
+    sendT.textContent = "IT Support — ตั๋วใบใหม่";
+    sendN.textContent = "1 ข้อความ";
+    feed.innerHTML = "";
+    push(msgEl("you", Q1 + FILECHIP));
+    at(560, function () { el("k-file").classList.add("is-on"); });
+  }
+
+  /* ---- beat 4: คิดแป๊บเดียวแล้วตอบ พร้อมไฮไลต์บรรทัดที่หยิบไปใช้ ---- */
+  function answer1() {
+    var t = push(msgEl("ai", '<div class="dots"><i></i><i></i><i></i></div>'));
+    sendN.textContent = "2 ข้อความ";
+    at(700, function () { hilite("a"); });
+    at(1300, function () {
+      if (t.parentNode) t.parentNode.removeChild(t);
+      push(msgEl("ai", A1));
+    });
+  }
+
+  /* ---- beat 5: ตั๋วใบที่สอง — ไฟล์เดิม แต่ไฮไลต์ย้ายไปคนละบรรทัด ---- */
+  function ticket2() {
+    var m = push(msgEl("you", Q2 + FILECHIP));
+    sendN.textContent = "3 ข้อความ";
+    at(400, function () { m.querySelector(".chip").classList.add("is-on"); });
+    var t;
+    at(900, function () { t = push(msgEl("ai", '<div class="dots"><i></i><i></i><i></i></div>')); });
+    at(1500, function () { hilite("b"); });
+    at(2400, function () {
+      if (t && t.parentNode) t.parentNode.removeChild(t);
+      push(msgEl("ai", A2));
+      sendN.textContent = "4 ข้อความ";
+    });
+  }
+
+  /* ---- beat 6: ตั๋วที่เหลือซ้อนรออยู่ หน้าต่างแชทจางลงไปเป็นฉากหลัง ---- */
+  function more() {
+    sendEl.classList.add("is-gone");
+    TKS.forEach(function (id, i) {
+      at(420 + i * 200, function () { el(id).classList.add("is-on"); });
+    });
+  }
+
+  var STEP = { 2: toFile, 3: ticket1, 4: answer1, 5: ticket2, 6: more };
+
+  function paint() {
+    el("count").textContent = beat + "/" + BEATS;
+    capEl.innerHTML = CAPS[beat] || "";
+    stage.classList.toggle("is-waiting", beat > 0 && !leaving);
+    el("btn-prev").disabled = (beat <= 1 && !embed && !PREV);
+    el("btn-next").disabled = leaving;
+  }
+
+  function armAuto() { if (auto && !leaving) at(AUTO_HOLD[beat], advance); }
+
+  /* ก่อนเล่นอนิเมชันของบีต n ต้อง "ปิดงาน" บีต n-1 ให้เรียบร้อยก่อนเสมอ
+     เพราะ STEP หลายตัวทยอยเปิดของด้วย at() ถ้าคนกดรัวๆ clearTimers() จะฆ่า
+     timer ที่ยังไม่ทำงาน แล้วไฟล์หรือของบนจอจะหายไปทั้งอัน
+     rebuild(n-1) วางสถานะแบบไม่มีอนิเมชัน เลยปลอดภัยที่จะเรียกซ้ำ */
+  function setBeat(n) {
+    clearTimers();
+    var step = (n === beat + 1) && STEP[n] && !reduce;
+    if (step) rebuild(n - 1);
+    beat = n;
+    if (step) STEP[n](); else rebuild(n);
+    paint();
+    armAuto();
+  }
+
+  function advance() {
+    if (leaving) return;
+    if (beat < BEATS) setBeat(beat + 1);
+    else go("next");
+  }
+
+  function back() {
+    if (leaving) return;
+    if (beat > 1) setBeat(beat - 1);
+    else go("prev");
+  }
+
+  function reset() {
+    clearTimers();
+    blink.classList.remove("is-out");
+    leaving = false;
+    setBeat(0);
+    at(60, function () { setBeat(1); });
+  }
+
+  function go(dir) {
+    if (leaving) return;
+    var target = dir === "prev" ? PREV : NEXT;
+    if (!embed && !target) return;
+    leaving = true;
+    clearTimers();
+    paint();
+    blink.classList.add("is-out");
+    setTimeout(function () {
+      if (embed) {
+        window.parent.postMessage({ type: "slide:" + dir, from: "05-context" }, "*");
+      } else {
+        window.location.href = target;
+      }
+    }, reduce ? 0 : 620);
+  }
+
+  /* ---- ปุ่มควบคุม ---- */
+  var controls = el("controls");
+  var btnAuto  = el("btn-auto");
+  controls.addEventListener("click", function (e) { e.stopPropagation(); });
+
+  el("btn-next").addEventListener("click", advance);
+  el("btn-prev").addEventListener("click", back);
+  el("btn-reset").addEventListener("click", reset);
+  btnAuto.addEventListener("click", function () {
+    auto = !auto;
+    btnAuto.setAttribute("aria-pressed", auto ? "true" : "false");
+    clearTimers();
+    armAuto();
+  });
+
+  document.addEventListener("click", advance);
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Enter" || e.key === " " || e.key === "ArrowRight" || e.key === "PageDown") {
+      e.preventDefault(); advance();
+    } else if (e.key === "ArrowLeft" || e.key === "PageUp") {
+      e.preventDefault(); back();
+    } else if (e.key === "r" || e.key === "R") {
+      reset();
+    }
+  });
+
+  /* ============================================================
+     ฉากล่าง — ลูปของตัวเอง ไม่ยุ่งกับ beat เลย
+     ใช้ตัวจับเวลาคนละชุด (sceneT) จะได้ไม่โดน clearTimers() ของ beat ล้าง
+
+     ต่างจากสไลด์ 4: คนพูดคำเดียวจบ ไม่ต้องพิมพ์ยาวอีกแล้ว
+     ของที่ขาดไป หุ่นไปเปิดตู้เก็บของอ่านเอง (ตู้ .store ไฟวิ่ง = ไฟล์ context)
+     ลูปเลยสั้นกว่าสไลด์ 4 เกือบครึ่ง (~19.5s) — ความสั้นนี่แหละคือใจความ
+     ============================================================ */
+  var BOT_HOME = 402;                      /* กลางตู้ rack — หุ่นเลื่อนเข้าไปหลังตู้ */
+  var BOT_TALK = 856;                      /* จุดที่หุ่นมายืนคุยกับคน (ห่างจากคน 28px) */
+  var GUY_X    = 931;                      /* คนยืนนิ่ง ขอบขวาสุดของฉาก = 978 */
+
+  var bot    = el("bot");
+  var guy    = el("guy");
+  var botSay = el("bot-say");
+  var guySay = el("guy-say");
+  var rack   = el("rack");
+  var store  = el("store");
+
+  var BOT_LINES  = ["0101", "♪", "▪▪▪", "10▪"];
+  var CALL_LINES = ["▪▪", "?", "!", "▪?"];
+  function pick(a) { return a[Math.floor(Math.random() * a.length)]; }
+
+  var sceneT = [];
+  function sat(ms, fn) { sceneT.push(setTimeout(fn, ms)); }
+
+  function face(pawn, name) {
+    var sp = pawn.querySelector(".sprite");
+    if (sp.getAttribute("data-char") === name) return;
+    sp.setAttribute("data-char", name);
+    if (window.Characters) window.Characters.hydrate(pawn);
+  }
+  function say(e, text, emo) {
+    e.textContent = text;
+    e.classList.toggle("is-emo", !!emo);
+    e.classList.add("is-on");
+  }
+  function hush(e) { e.classList.remove("is-on"); }
+
+  function move(x, ms) {
+    bot.style.setProperty("--walk", ms + "ms");
+    bot.offsetHeight;                      /* บังคับ reflow ให้ duration ใหม่มีผลก่อนย้าย */
+    bot.style.setProperty("--x", x + "px");
+  }
+
+  function scene() {
+    var t = 0;
+    function step(ms, fn) { t += ms; sat(t, fn); }
+
+    /* คนเรียก */
+    step(600, function () { face(guy, "human-left"); say(guySay, pick(CALL_LINES)); });
+    /* หุ่นออกจากตู้มาหา */
+    step(800, function () {
+      hush(guySay);
+      bot.classList.remove("is-hidden");
+      rack.classList.remove("is-busy");
+      face(bot, "robot-right");
+      move(BOT_TALK, 2000);
+    });
+    /* ถึงแล้ว คนบอกสั้นๆ คำเดียว — จุดที่ต่างจากสไลด์ 4 ที่ต้องพิมพ์ยาว */
+    step(2200, function () { say(guySay, pick(CALL_LINES)); });
+    step(900,  function () { hush(guySay); });
+    step(300,  function () { say(botSay, "✓"); });
+    step(650,  function () { hush(botSay); });
+    /* กลับเข้าตู้ไปทำ แล้วเปิดตู้เก็บของอ่าน context เองระหว่างทำ */
+    step(250,  function () { face(bot, "robot-left"); face(guy, "human"); move(BOT_HOME, 2000); });
+    step(2000, function () {
+      bot.classList.add("is-hidden");
+      rack.classList.add("is-busy");
+      store.classList.add("is-read");
+    });
+    step(2600, function () {
+      store.classList.remove("is-read");
+      bot.classList.remove("is-hidden");
+      rack.classList.remove("is-busy");
+      face(bot, "robot-right");
+      face(guy, "human-left");
+      move(BOT_TALK, 2000);
+    });
+    /* ออกมาตอบ ถูกตั้งแต่ครั้งแรก */
+    step(2200, function () { say(botSay, pick(BOT_LINES)); });
+    step(1300, function () { hush(botSay); });
+    step(600,  function () { say(guySay, "✅", true); });
+    step(1500, function () { hush(guySay); });
+    /* กลับเข้าตู้ แล้ววนใหม่ */
+    step(300,  function () { face(bot, "robot-left"); face(guy, "human"); move(BOT_HOME, 2000); });
+    step(2000, function () { bot.classList.add("is-hidden"); rack.classList.add("is-busy"); });
+
+    step(1300, scene);
+  }
+
+  guy.style.setProperty("--x", GUY_X + "px");
+  bot.style.setProperty("--x", BOT_HOME + "px");
+
+  if (reduce) {
+    bot.style.setProperty("--x", BOT_TALK + "px");
+    face(bot, "robot-right");
+    face(guy, "human-left");
+  } else {
+    bot.classList.add("is-hidden");
+    rack.classList.add("is-busy");
+    sat(300, scene);
+  }
+
+  rebuild(0);
+  paint();
+  at(220, function () { setBeat(1); });
+})();
+</script>
+</body>
+</html>
