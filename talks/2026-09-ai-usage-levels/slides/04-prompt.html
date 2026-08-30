@@ -193,10 +193,10 @@ body {
   position: relative;
   flex: 1 1 auto;
   overflow: hidden;
-  -webkit-mask-image: linear-gradient(to bottom,
-                       rgba(0,0,0,0) 0, rgba(0,0,0,.12) 16px, #000 64px);
-          mask-image: linear-gradient(to bottom,
-                       rgba(0,0,0,0) 0, rgba(0,0,0,.12) 16px, #000 64px);
+  /* ไล่จางสั้นๆ พอบอกว่ามีของอยู่เหนือขึ้นไป — ยาวกว่านี้แล้วหัวฟองพรอมต์ของ
+     beat 3 จะโดนกลืน ทั้งที่ตอนนั้นยังไม่มีอะไรเลื่อนขึ้นไปจริงๆ */
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 26px);
+          mask-image: linear-gradient(to bottom, transparent 0, #000 26px);
 }
 .feed {
   position: absolute;
@@ -244,8 +244,8 @@ body {
   background: var(--ground-light);
   font-family: var(--font-body);
   font-weight: 300;
-  font-size: 14px;
-  line-height: 1.5;
+  font-size: 13.5px;
+  line-height: 1.45;
   color: var(--ink);
 }
 .msg.you .bub { background: var(--frame); }
@@ -287,7 +287,7 @@ body {
   display: flex;
   align-items: stretch;
   gap: 10px;
-  margin-top: 9px;
+  margin-top: 7px;
 }
 .shot {
   flex: 0 0 auto;
@@ -322,7 +322,7 @@ body {
   overflow: hidden;
 }
 
-.ask { margin-top: 9px; }
+.ask { margin-top: 7px; }
 .bub .fix {
   margin-top: 7px;
   padding-left: 11px;
@@ -734,11 +734,11 @@ body {
     { who: "ai",  t: "ERROR 00412 ส่วนใหญ่คือสินค้าหมดสต็อกครับ" },
     { who: "you", t: "ของในคลังมีอยู่ 200 ชิ้น คลังไม่ได้ขาด", to: ["lead", "r0"] },
     { who: "ai",  t: "งั้นอาจเป็นราคา/โปรโมชันไม่อัปเดต ลองล้าง cache" },
-    { who: "you", t: "ล้างแล้ว ยังยืนยันไม่ผ่าน (แนบรูปหน้าจอ)", to: ["r1", "shot"] },
+    { who: "you", t: "ล้างแล้ว ยังไม่ผ่าน (แนบรูปหน้าสรุปคำสั่งซื้อ)", to: ["r1", "shot"] },
     { who: "ai",  t: "จากรูป ปุ่มยืนยันเป็นสีเทา น่าจะกรอกไม่ครบ" },
     { who: "you", t: "กรอกครบ ที่อยู่ก็ใส่แล้ว กดแล้วถึงเด้ง error", to: ["r2"] },
     { who: "ai",  t: "งั้นอาจเป็นสิทธิ์ ลูกค้าอาจสั่งสินค้ากลุ่มนี้ไม่ได้" },
-    { who: "you", t: "ลูกค้ารายอื่นสั่งตัวเดียวกันได้ รายนี้รายเดียวที่ไม่ได้", to: ["r3"] },
+    { who: "you", t: "รายอื่นสั่งได้ / ค่าจัดส่งกับยอดรวมขึ้นเป็นขีด", to: ["r3", "r4"] },
     { who: "ai",  t: "รบกวนขอ log ของ ORD123 กับโค้ดที่ตรวจก่อนยืนยัน" },
     { who: "you", t: "นี่ครับ (แนบ log + โค้ด validate.js:88)", to: ["data"] },
     { who: "ai",  t: "เจอแล้วครับ ที่อยู่รายนี้อยู่นอกพื้นที่จัดส่งที่ระบบรู้จัก" },
@@ -801,6 +801,7 @@ body {
       '<li class="pc" id="p-r1">ล้าง cache ราคาแล้ว อาการเหมือนเดิม</li>' +
       '<li class="pc" id="p-r2">กรอกข้อมูลครบ ที่อยู่ก็ใส่แล้ว error เด้งตอนกดยืนยัน</li>' +
       '<li class="pc" id="p-r3">ลูกค้ารายอื่นสั่งสินค้าตัวเดียวกันได้ รายนี้รายเดียวที่ไม่ได้</li>' +
+      '<li class="pc" id="p-r4">ในหน้าสรุปคำสั่งซื้อ ช่องค่าจัดส่งกับยอดรวมขึ้นเป็นขีด</li>' +
     '</ul>' +
     '<div class="att">' +
       '<div class="shot pc" id="p-shot"><div class="top"></div><div class="body">' + WARN +
@@ -809,8 +810,8 @@ body {
       '<div class="log pc" id="p-data">' + LOG + '</div>' +
     '</div>' +
     '<p class="pc ask" id="p-ask">ช่วยไล่หาสาเหตุที่แท้จริงให้หน่อยครับ ' +
-      'อยากได้ทั้งวิธีแก้เฉพาะหน้าสำหรับลูกค้ารายนี้ ' +
-      'และวิธีแก้ระยะยาวที่กันไม่ให้เกิดกับลูกค้ารายอื่นด้วย</p>';
+      'อยากได้ทั้งวิธีแก้เฉพาะหน้าสำหรับรายนี้ ' +
+      'และวิธีแก้ระยะยาวที่กันไม่ให้เกิดกับรายอื่น</p>';
 
   var ANSWER =
     '<p>ORD123 ไม่ผ่านเพราะ <b>ที่อยู่ของลูกค้ารายนี้อยู่นอกพื้นที่จัดส่งที่ระบบรู้จัก</b> ' +
