@@ -25,14 +25,14 @@
    -> อย่าเอาชั้นวางหลายชิ้น / ซ็อกเก็ต / ชื่อเครื่องมือ กลับมา
 
    หมัดเด็ดของสไลด์นี้อยู่ที่ beat 3: ประโยคที่พิมพ์คือ
-   "ออเดอร์ ORD123 ลูกค้ากดยืนยันไม่ผ่านครับ ระบบขึ้น ERROR 00412"
+   "user EMP042 ล็อกอินเข้า StaffHub ไม่ได้ครับ"
    ซึ่งเป็นข้อความแรกของสไลด์ 3 คำต่อคำ — ประโยคเดียวกันเป๊ะ ตอนนั้นโดนเดาผิด 4 รอบ
    มาคราวนี้ถูกตั้งแต่คำตอบแรก => คนไม่ได้เก่งขึ้น AI ก็ตัวเดิม ของรอบตัวมันเปลี่ยน
    *** ห้ามแก้ประโยคนี้ให้ต่างจากสไลด์ 3 เด็ดขาด มุกทั้งสไลด์อยู่ตรงนี้ ***
 
    มุกรองที่ทำให้ "ไฟล์เดียวพอ" จับต้องได้:
    ตอน AI ตอบ บรรทัดในไฟล์ที่มันหยิบไปใช้จะไฮไลต์ค้างไว้
-   ตั๋วใบ 1 ใช้ DB + validate.js + ขั้นตอน 2,3 / ตั๋วใบ 2 ใช้ Log + API + ขั้นตอน 1,2
+   ตั๋วใบ 1 ใช้ DB + authorize.js + ขั้นตอน 2,3 / ตั๋วใบ 2 ใช้ Log + API + ขั้นตอน 1,2
    ไฟล์เดียวกันเป๊ะ ไม่ได้แก้อะไรเลย แต่คนละบรรทัดถูกใช้
 
    6 beat (หนึ่งบีตหนึ่งความคิด)
@@ -746,31 +746,31 @@ html, body {
   <div class="head">ระดับ 03 — Context</div>
 
   <div class="pane file" id="file">
-    <div class="bar"><b></b><span class="fn">context/order-error.md</span><span class="n" id="file-n">แนบทุกครั้ง</span></div>
+    <div class="bar"><b></b><span class="fn">context/staffhub-access.md</span><span class="n" id="file-n">แนบทุกครั้ง</span></div>
     <div class="doc">
       <div class="blk" id="b-head">
-        <div class="dh">ไล่หา root cause ของ order error</div>
-        <p class="dp">order service บน production — Node + Postgres · repo <b>order-api</b></p>
+        <div class="dh">ไล่หาสาเหตุ user เข้าระบบภายในไม่ได้</div>
+        <p class="dp">StaffHub — ระบบภายในของพนักงาน · SSO ผ่าน Azure AD · repo <b>staffhub-api</b></p>
       </div>
 
       <div class="blk" id="b-addr">
         <div class="ds">ที่อยู่ของของ</div>
         <ul class="dul">
-          <li class="dl addr" id="d-web"><span class="dk">หน้าเว็บ</span><span class="dv">shop.example.com/checkout</span></li>
-          <li class="dl addr" id="d-api"><span class="dk">API</span><span class="dv">api.example.com/v1/orders</span></li>
-          <li class="dl addr" id="d-log"><span class="dk">Log</span><span class="dv">Grafana &rarr; "order-api (prod)"</span></li>
-          <li class="dl addr" id="d-db"><span class="dk">DB</span><span class="dv">pg-prod · orders, customers, zones</span></li>
-          <li class="dl addr" id="d-code"><span class="dk">โค้ดที่ตรวจ</span><span class="dv">order-api/validate.js</span></li>
-          <li class="dl addr" id="d-team"><span class="dk">ทีมที่เกี่ยวข้อง</span><span class="dv">คลังสินค้า · ขนส่ง · ราคา/โปรโมชัน</span></li>
+          <li class="dl addr" id="d-web"><span class="dk">หน้าเว็บ</span><span class="dv">staffhub.example.com</span></li>
+          <li class="dl addr" id="d-api"><span class="dk">API</span><span class="dv">api.example.com/v1/auth</span></li>
+          <li class="dl addr" id="d-log"><span class="dk">Log</span><span class="dv">Grafana &rarr; "staffhub-auth (prod)"</span></li>
+          <li class="dl addr" id="d-db"><span class="dk">DB</span><span class="dv">pg-prod · users, permissions</span></li>
+          <li class="dl addr" id="d-code"><span class="dk">โค้ดที่ตรวจ</span><span class="dv">staffhub-api/authorize.js</span></li>
+          <li class="dl addr" id="d-team"><span class="dk">ทีมที่เกี่ยวข้อง</span><span class="dv">HR · IT Support · Identity</span></li>
         </ul>
       </div>
 
       <div class="blk" id="b-step">
         <div class="ds">ขั้นตอนที่ให้ไล่</div>
         <ol class="dol">
-          <li class="dl" id="d-s1">อ่าน log ช่วงเวลาที่ลูกค้าแจ้ง หา error หรือ timeout</li>
-          <li class="dl" id="d-s2">เทียบกับข้อมูลของลูกค้ารายนั้นใน DB ไม่ใช่ดูภาพรวม</li>
-          <li class="dl" id="d-s3">ถ้ารายอื่นปกติ ให้สงสัยข้อมูลของรายนั้นก่อน ไม่ใช่โค้ด</li>
+          <li class="dl" id="d-s1">อ่าน login log ของ user คนนั้นในช่วงเวลาที่แจ้ง</li>
+          <li class="dl" id="d-s2">เทียบข้อมูล user ใน DB กับสิทธิ์ที่ระบบใช้จริง</li>
+          <li class="dl" id="d-s3">เช็คว่าเพิ่งย้ายแผนกหรือเปลี่ยนตำแหน่งมาหรือเปล่า</li>
           <li class="dl" id="d-s4">ถ้าข้อมูลไม่พอ ให้ขอเพิ่ม อย่าเดา</li>
         </ol>
       </div>
@@ -788,9 +788,9 @@ html, body {
   </div>
 
   <div class="more" id="more">
-    <div class="tk" id="tk-0"><span class="tl">ตั๋วใบที่ 3</span>ORD311 ลูกค้าจ่ายเงินแล้ว แต่ออเดอร์ไม่ขึ้นในระบบ</div>
-    <div class="tk" id="tk-1"><span class="tl">ตั๋วใบที่ 4</span>ORD402 ยอดในใบเสร็จไม่ตรงกับที่ลูกค้ากดสั่ง</div>
-    <div class="tk" id="tk-2"><span class="tl">ตั๋วใบที่ 5</span>ORD503 กดยกเลิกออเดอร์แล้วขึ้น error 00503</div>
+    <div class="tk" id="tk-0"><span class="tl">ตั๋วใบที่ 3</span>EMP118 ลาออกไปแล้ว แต่ยังเข้า StaffHub ได้อยู่</div>
+    <div class="tk" id="tk-1"><span class="tl">ตั๋วใบที่ 4</span>EMP305 เห็นข้อมูลของแผนกอื่นที่ไม่ควรเห็น</div>
+    <div class="tk" id="tk-2"><span class="tl">ตั๋วใบที่ 5</span>ทั้งทีม HR กดอนุมัติใบลาไม่ได้ตั้งแต่เช้า</div>
     <div class="dotdot" id="tk-dot">···</div>
   </div>
 
@@ -871,17 +871,17 @@ html, body {
      ============================================================ */
   var PROMPT =
     '<div class="grp once"><span class="tag">เฉพาะเคสนี้</span>' +
-      '<p>ออเดอร์ ORD123 ของลูกค้ารายหนึ่งกดยืนยันไม่ผ่าน ระบบขึ้น ERROR 00412</p>' +
+      '<p>user EMP042 ล็อกอินเข้า StaffHub ไม่ได้</p>' +
       '<ul>' +
-        '<li>ของในคลังมี 200 ชิ้น / ล้าง cache ราคาแล้วอาการเหมือนเดิม</li>' +
-        '<li>กรอกครบ ที่อยู่ก็ใส่แล้ว error เด้งตอนกดยืนยัน</li>' +
-        '<li>ลูกค้ารายอื่นสั่งตัวเดียวกันได้ / หน้าสรุปขึ้นค่าจัดส่งกับยอดรวมเป็นขีด</li>' +
-        '<li>(แนบ log + โค้ด validate.js:88)</li>' +
+        '<li>account ปกติ ไม่ได้ถูก lock / reset password แล้วยังไม่ได้</li>' +
+        '<li>หน้าจอขึ้น Access denied — You don\'t have access to StaffHub</li>' +
+        '<li>เมื่อวาน user เพิ่งย้ายจากแผนก Sales ไป Finance</li>' +
+        '<li>(แนบรูปหน้าจอ + login log)</li>' +
       '</ul></div>' +
     '<div class="grp keep" id="keep"><span class="tag">เหมือนกันทุกเคส</span>' +
-      '<p>ระบบคือ order service บน production — Node + Postgres repo <b>order-api</b> ' +
-      'log อยู่ที่ Grafana ข้อมูลลูกค้าอยู่ที่ pg-prod ทีมที่เกี่ยวข้อง: คลัง / ขนส่ง / ราคา</p>' +
-      '<p>ช่วยไล่หาสาเหตุที่แท้จริงให้ครับ เทียบกับข้อมูลของลูกค้ารายนั้นด้วย ' +
+      '<p>ระบบคือ StaffHub บน production — SSO ผ่าน Azure AD repo <b>staffhub-api</b> ' +
+      'log อยู่ที่ Grafana ข้อมูล user อยู่ที่ pg-prod ทีมที่เกี่ยวข้อง: HR / IT Support / Identity</p>' +
+      '<p>ช่วยไล่หาสาเหตุที่แท้จริงให้ครับ เทียบข้อมูล user รายนั้นกับสิทธิ์ที่ระบบใช้จริงด้วย ' +
       'ถ้าข้อมูลไม่พออย่าเพิ่งเดา ให้ขอเพิ่มได้</p>' +
       '<p>ตอบเป็นภาษาธุรกิจก่อน แล้วค่อยแนบหลักฐานทางเทคนิค ' +
       'แล้วแยกเป็น วิธีแก้เฉพาะหน้า / ระยะยาว / ทีมที่ต้องลงมือ</p></div>';
@@ -890,35 +890,34 @@ html, body {
      ตั๋วใบที่ 1 — ประโยคเดียวกับข้อความแรกของสไลด์ 3 คำต่อคำ
      *** ห้ามแก้ให้ต่างจากสไลด์ 3 มุกทั้งสไลด์อยู่ตรงนี้ ***
      ============================================================ */
-  var Q1 = "ออเดอร์ ORD123 ลูกค้ากดยืนยันไม่ผ่านครับ ระบบขึ้น ERROR 00412";
+  var Q1 = "user EMP042 ล็อกอินเข้า StaffHub ไม่ได้ครับ";
 
   var FILECHIP =
     '<div class="atc"><span class="al">แนบไปด้วยเสมอ</span>' +
-      '<span class="chip" id="k-file"><span class="fi"></span>context/order-error.md</span>' +
+      '<span class="chip" id="k-file"><span class="fi"></span>context/staffhub-access.md</span>' +
     '</div>';
 
   var A1 =
-    '<p>ตามขั้นตอนในไฟล์ ผมเทียบข้อมูลของลูกค้ารายนี้ใน pg-prod แล้วครับ — ORD123 ไม่ผ่านเพราะ ' +
-    '<b>ที่อยู่ของรายนี้อยู่นอกพื้นที่จัดส่งที่ระบบรู้จัก</b> ไม่ใช่ลูกค้ากรอกอะไรผิด</p>' +
-    '<p>หลักฐาน: รหัสไปรษณีย์ 57130 ยังไม่มีในตาราง zones · ค่าส่งเลยเป็น NaN ยอดรวมก็เป็น NaN ' +
-    'ทั้งก้อน · validate.js:88 เช็ค grandTotal > 0 ซึ่ง NaN ได้ false เสมอ เลยโยน 00412 ออกมา</p>' +
-    '<p class="fix">เฉพาะหน้า: เพิ่มรหัสไปรษณีย์เข้าตารางโซน แล้วให้ลูกค้ากดยืนยัน ORD123 ใหม่<br>' +
-    'ระยะยาว: ถ้าหาโซนไม่เจอ ต้องบอกว่ายังไม่รองรับพื้นที่นี้ แทนรหัส 00412 ลอยๆ<br>' +
-    'ทีมที่ต้องลงมือ: ทีมขนส่ง</p>';
+    '<p>ตามขั้นตอนในไฟล์ ผมเทียบข้อมูล user รายนี้ใน pg-prod กับสิทธิ์ที่ระบบใช้จริงแล้วครับ — ' +
+    'EMP042 เข้าไม่ได้เพราะ <b>สิทธิ์ยังผูกอยู่กับแผนกเดิม</b> ไม่ใช่ account มีปัญหา</p>' +
+    '<p>หลักฐาน: login log บอก department=Sales แต่ required=Finance · ในตาราง users ' +
+    'แผนกเป็น Finance ตั้งแต่เมื่อวาน · authorize.js:64 เทียบกับฝั่งสิทธิ์ที่ยังค้างเป็น Sales</p>' +
+    '<p class="fix">เฉพาะหน้า: sync สิทธิ์ของ EMP042 เป็น Finance แล้วให้ล็อกอินใหม่<br>' +
+    'ระยะยาว: ให้ขั้นตอนย้ายแผนกของ HR สั่ง sync สิทธิ์อัตโนมัติ<br>' +
+    'ทีมที่ต้องลงมือ: Identity</p>';
 
   /* ตั๋วใบที่ 2 — จงใจเลือกอาการที่ "ไม่มี error"
      เพื่อให้ AI ต้องใช้บรรทัดอื่นในไฟล์เดิม (Log + API + ขั้นตอน 1)
      ไม่ใช่บรรทัดชุดเดิมกับใบแรก */
-  var Q2 = "อีกเคสครับ ORD208 ลูกค้ากด checkout แล้วค้าง ไม่ขึ้น error อะไรเลย";
+  var Q2 = "อีกเคสครับ ทีม Marketing เข้า StaffHub แล้วค้าง ไม่ขึ้น error อะไรเลย";
 
   var A2 =
-    '<p><b>ลูกค้าไม่ได้ทำอะไรผิด ออเดอร์ใหญ่เกินกว่าที่ระบบคำนวณทัน</b> — ORD208 มี 214 รายการ ' +
-    'ระบบไล่ดึงราคาทีละรายการ รวม 214 ครั้ง ใช้เวลาเกิน 30 วินาที ระบบชำระเงินตัดก่อน ' +
-    'หน้าจอเลยค้างโดยไม่มีข้อความอะไรขึ้น</p>' +
-    '<p>หลักฐาน: log ที่ Grafana ช่วงที่ลูกค้าแจ้ง request ค้างที่ /v1/orders แล้วถูกตัดที่ 30 วิ</p>' +
-    '<p class="fix">เฉพาะหน้า: ให้ลูกค้าแยกเป็นสองออเดอร์<br>' +
-    'ระยะยาว: รวมการดึงราคาเป็นครั้งเดียว แล้วขึ้นข้อความบอกลูกค้าแทนจอค้าง<br>' +
-    'ทีมที่ต้องลงมือ: ทีมราคา/โปรโมชัน</p>';
+    '<p>ไม่ใช่เรื่องสิทธิ์ครับ เป็น <b>timeout</b> — ทีมนี้ถูกผูกไว้กับกลุ่มสิทธิ์ 214 กลุ่ม</p>' +
+    '<p>ดู log ที่ Grafana ช่วงที่แจ้ง request ที่ /v1/auth ไล่เช็คสิทธิ์ทีละกลุ่ม รวม 214 ครั้ง ' +
+    'ใช้เวลาเกิน 30 วินาที แล้วถูกตัด หน้าจอเลยค้างโดยไม่มีข้อความอะไรขึ้นมา</p>' +
+    '<p class="fix">เฉพาะหน้า: ยุบกลุ่มสิทธิ์ที่ซ้ำกันของทีมนี้ออกก่อน<br>' +
+    'ระยะยาว: รวมการเช็คสิทธิ์เป็นครั้งเดียว แล้วขึ้นข้อความบอกผู้ใช้แทนจอค้าง<br>' +
+    'ทีมที่ต้องลงมือ: Identity</p>';
 
   /* บรรทัดในไฟล์ที่ AI หยิบไปใช้ — คนละชุดกันสองใบ ทั้งที่ไฟล์ไม่ได้ถูกแก้เลย */
   var HL = {
@@ -931,7 +930,7 @@ html, body {
     "พรอมต์ยาวๆ ของระดับ 02 มีของสองอย่างปนกันอยู่",
     "ของที่เหมือนเดิมทุกครั้ง ย้ายไปเขียนไว้ในไฟล์เดียว เขียนครั้งเดียวพอ",
     'ตั๋วใบใหม่ พิมพ์แค่ประโยคเดียว ไฟล์ถูกแนบไปด้วยเอง' +
-      '<span class="sub">ประโยคนี้คือข้อความแรกของระดับ 01 คำต่อคำ — ตอนนั้นได้คำเดาผิดกลับมา 4 รอบ</span>',
+      '<span class="sub">ประโยคนี้คือข้อความแรกของระดับ 01 คำต่อคำ — ตอนนั้นต้องคุยกัน 9 ข้อความกว่าจะจบ</span>',
     "ข้อความสั้นกว่าระดับ 02 ด้วยซ้ำ แต่ได้สาเหตุที่แท้จริงตั้งแต่คำตอบแรก",
     'ตั๋วใบใหม่ คนละอาการ ไฟล์เดิมไม่ได้แก้อะไรเลย' +
       '<span class="sub">สังเกตว่าบรรทัดที่มันหยิบไปใช้เปลี่ยนไปเอง — ใบแรกใช้ DB กับโค้ด ใบนี้ใช้ log กับ API</span>',
