@@ -1,0 +1,4 @@
+interface:
+  display_name: "Worker Pool Mode"
+  short_description: "Manage up to two reusable Terra workers"
+  default_prompt: "Use $worker-pool-mode to delegate suitable work to the worker pool."
