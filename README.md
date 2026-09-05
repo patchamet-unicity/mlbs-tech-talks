@@ -9,15 +9,18 @@ talks/YYYY-MM-<topic>/
 ├── slides/     # ตัว presentation
 ├── assets/     # รูป ไฟล์ประกอบ
 ├── NOTES.md    # เนื้อหา script ลิงก์อ้างอิง
-└── HANDOFF.md  # working state (ทำถึงไหน / ต่อยังไง) — /prep-compact เขียนให้
+└── HANDOFF.md  # working state (ทำถึงไหน / ต่อยังไง)
 ```
 
-## Skills
+## เปิด Slide Preview
 
-| Skill | ใช้ทำอะไร |
-| --- | --- |
-| `/push-session` | commit + push แค่ไฟล์ที่ session นี้แตะ |
-| `/prep-compact` | อัปเดต HANDOFF.md แล้ว push ก่อน `/compact` |
+รันจาก repo root:
+
+```powershell
+python -m http.server 8777
+```
+
+แล้วเปิด `http://localhost:8777/` ใน browser
 
 ## Talks
 

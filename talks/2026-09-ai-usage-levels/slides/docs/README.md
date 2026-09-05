@@ -83,4 +83,4 @@ python -m http.server 8777
 ```
 
 แล้วเปิด `http://localhost:8777/talks/2026-09-ai-usage-levels/slides/01-title.html`
-(มี `.claude/launch.json` ตั้งไว้ให้แล้ว)
+(จาก repo root ใช้ `python -m http.server 8777`)
