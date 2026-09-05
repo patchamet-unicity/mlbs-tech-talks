@@ -1,0 +1,4 @@
+interface:
+  display_name: "Save Handoff"
+  short_description: "Capture the current talk state for the next session"
+  default_prompt: "Update the active talk HANDOFF.md so another Codex session can continue immediately."
