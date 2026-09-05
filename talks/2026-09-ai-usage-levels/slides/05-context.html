@@ -144,6 +144,13 @@ html, body {
 /* แถบหัวไฟล์กะพริบรับหนึ่งทีตอนของบินมาลง */
 .file .bar { transition: background .18s linear; }
 .file .bar.is-hit { background: var(--frame); }
+/* beat 6 ย้ำสั้นๆ ว่าไฟล์เดิมตามไปกับทุกเคส */
+.file .bar .n.is-pulse { animation: attachPulse .72s ease-out 1; }
+@keyframes attachPulse {
+  0%, 100% { opacity: .7; }
+  38% { opacity: 1; }
+  62% { opacity: .2; }
+}
 
 /* ---- ชั้นบินของ "ผี" — ลอยเหนือทุกกล่อง ไม่โดน overflow ตัด ---- */
 .fly {
@@ -254,7 +261,6 @@ html, body {
   transition: transform .55s cubic-bezier(.5, 0, .2, 1), opacity .4s ease-out;
 }
 .pane-send.is-wide { transform: translateX(-270px); }
-.pane-send.is-gone { opacity: 0; }
 
 .viewport {
   position: relative;
@@ -432,46 +438,31 @@ html, body {
 .dots i:nth-child(3) { animation-delay: .6s; }
 @keyframes dotPulse { 0%, 60% { opacity: .85 } 61%, 100% { opacity: .25 } }
 
-/* ---- beat 6: ตั๋วที่เหลือซ้อนรออยู่ ทับพื้นที่หน้าต่างแชท ---- */
-.more {
-  position: absolute;
-  left: 600px;
-  top: 96px;
-  width: 620px;
-  height: 396px;
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 13px;
-  padding: 0 46px;
-  pointer-events: none;
-}
-.tk {
-  padding: 11px 15px 12px;
-  box-sizing: border-box;
-  background: var(--ground-light);
-  border: 4px solid var(--ink);
-  font-family: var(--font-body);
-  font-weight: 300;
-  font-size: 13.5px;
-  line-height: 1.4;
-  color: var(--ink);
+/* ---- beat 6: เคสใหม่ยังอยู่ใน viewport เดิม แต่ละอันมีหัวของตัวเอง ---- */
+.case {
+  padding-top: 9px;
   opacity: 0;
   transform: translateY(14px);
   transition: opacity .38s ease-out, transform .38s cubic-bezier(.16, 1, .3, 1);
 }
-.tk.is-on { opacity: 1; transform: translateY(0); }
-.tk .tl {
-  display: block;
-  margin-bottom: 3px;
+.case:first-child { padding-top: 0; }
+.case.is-on { opacity: 1; transform: translateY(0); }
+.case-head {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin: 0 2px 4px;
   font-family: var(--font-mono);
   font-weight: 600;
   font-size: 10.5px;
   letter-spacing: .12em;
   color: var(--ink-soft);
 }
-.more .dotdot {
+.case-head .new { opacity: .7; }
+.case .msg { padding-top: 0; }
+.case .msg .bub { font-size: 13px; }
+.more-dot {
+  padding-top: 5px;
   text-align: center;
   font-family: var(--font-mono);
   font-weight: 600;
@@ -481,7 +472,7 @@ html, body {
   opacity: 0;
   transition: opacity .38s ease-out;
 }
-.more .dotdot.is-on { opacity: .8; }
+.more-dot.is-on { opacity: .8; }
 
 /* ---- บรรทัดคำบรรยาย y 500..556 ---- */
 .cap {
@@ -764,9 +755,9 @@ html, body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .pane, .pane-send, .file, .blk, .gh, .dl, .chip, .grp.keep, .tk, .more .dotdot,
+  .pane, .pane-send, .file, .blk, .gh, .dl, .chip, .grp.keep, .case, .more-dot,
   .msg { transition: none !important; }
-  .dots i, .store.is-read i { animation: none; }
+  .dots i, .store.is-read i, .file .bar .n.is-pulse { animation: none; }
   .pawn, .pawn-bot, .say { transition: none; }
   .bay .led, .rack .scan { animation: none; }
   .stage.is-waiting .wait { animation: none; opacity: 1; }
@@ -822,14 +813,6 @@ html, body {
   </div>
 
   <div class="fly" id="fly"></div>
-
-  <div class="more" id="more">
-    <div class="tk" id="tk-0"><span class="tl">ตั๋วใบที่ 3</span>EMP118 ลาออกไปแล้ว แต่ยังเข้า StaffHub ได้อยู่</div>
-    <div class="tk" id="tk-1"><span class="tl">ตั๋วใบที่ 4</span>EMP305 เห็นข้อมูลของแผนกอื่นที่ไม่ควรเห็น</div>
-    <div class="tk" id="tk-2"><span class="tl">ตั๋วใบที่ 5</span>ทั้งทีม HR กดอนุมัติใบลาไม่ได้ตั้งแต่เช้า</div>
-    <div class="dotdot" id="tk-dot">···</div>
-  </div>
-
   <div class="cap" id="cap"></div>
 
   <div class="scene" id="scene">
@@ -998,7 +981,11 @@ html, body {
     ["k-1", ["b-step"]],
     ["k-2", ["b-fmt"]]
   ];
-  var TKS  = ["tk-0", "tk-1", "tk-2", "tk-dot"];
+  var CASES = [
+    ["เคส 3", "EMP118 ลาออกแล้ว แต่ยังเข้า StaffHub ได้"],
+    ["เคส 4", "EMP305 เห็นข้อมูลของแผนกอื่น"],
+    ["เคส 5", "ทีม HR อนุมัติใบลาไม่ได้ตั้งแต่เช้า"]
+  ];
 
   function el(id) { return document.getElementById(id); }
 
@@ -1034,6 +1021,52 @@ html, body {
                   '<div class="bub">' + inner + '</div></div>';
     return m;
   }
+  function caseEl(item) {
+    var c = document.createElement("div");
+    c.className = "case";
+    c.innerHTML = '<div class="case-head"><span class="new">แชทใหม่</span><span>' + item[0] +
+                  '</span></div>';
+    c.appendChild(msgEl("you", item[1]));
+    return c;
+  }
+
+  function addCase(i, animate) {
+    var c = caseEl(CASES[i]);
+    if (animate) push(c);
+    else {
+      feed.appendChild(c);
+      c.classList.add("is-on");
+    }
+    return c;
+  }
+
+  function addMoreDot(animate) {
+    var d = document.createElement("div");
+    d.className = "more-dot";
+    d.textContent = "···";
+    feed.appendChild(d);
+    if (animate) at(0, function () { d.classList.add("is-on"); });
+    else d.classList.add("is-on");
+  }
+
+  function showMore(animate) {
+    feed.innerHTML = "";
+    sendT.textContent = "IT Support — เคสถัดไป";
+    sendN.textContent = "0 แชทใหม่";
+    CASES.forEach(function (_, i) {
+      if (animate) {
+        at(240 + i * 330, function () {
+          addCase(i, true);
+          sendN.textContent = (i + 1) + " แชทใหม่";
+        });
+      } else addCase(i, false);
+    });
+    if (animate) at(240 + CASES.length * 330, function () { addMoreDot(true); });
+    else {
+      addMoreDot(false);
+      sendN.textContent = CASES.length + " แชทใหม่";
+    }
+  }
 
   /* ข้อความใหม่ดันกองขึ้น: เกิดมาพร้อม margin-top ติดลบเท่าความสูงตัวเอง
      แล้ว transition กลับเป็น 0 (กลไกเดียวกับสไลด์ 3–4) */
@@ -1061,16 +1094,19 @@ html, body {
     flyEl.innerHTML = "";
 
     fileEl.classList.toggle("is-on", n >= 2);
+    sendEl.classList.remove("is-gone");
+    el("file-n").classList.remove("is-pulse");
     BLKS.forEach(function (id) { el(id).classList.toggle("is-on", n >= 2); });
-    hilite(n === 4 ? "a" : n >= 5 ? "b" : null);   /* บีต 3 ยังไม่ตอบ ยังไม่ต้องไฮไลต์ */
+    hilite(n === 4 ? "a" : n === 5 ? "b" : null);   /* บีต 3 และ 6 ไม่ค้างไฮไลต์ */
 
     sendEl.classList.toggle("is-wide", n === 1);
-    sendEl.classList.toggle("is-gone", n >= 6);
     sendT.textContent = n <= 2 ? "พรอมต์ที่ส่งไปในระดับ 02" : "IT Support — ตั๋วใบใหม่";
     sendN.textContent = (n <= 3 ? 1 : n <= 4 ? 2 : 4) + " ข้อความ";
 
     feed.innerHTML = "";
-    if (n <= 2) {
+    if (n >= 6) {
+      showMore(false);
+    } else if (n <= 2) {
       feed.appendChild(msgEl("you split", PROMPT));
       el("keep").classList.toggle("is-off", n >= 2);
     } else {
@@ -1084,8 +1120,6 @@ html, body {
         c.classList.add("is-on");
       });
     }
-
-    TKS.forEach(function (id) { el(id).classList.toggle("is-on", n >= 6); });
 
     stage.offsetHeight;                    /* บังคับ reflow ก่อนคืน transition */
     stage.classList.remove("is-jump");
@@ -1180,12 +1214,15 @@ html, body {
     });
   }
 
-  /* ---- beat 6: ตั๋วที่เหลือซ้อนรออยู่ หน้าต่างแชทจางลงไปเป็นฉากหลัง ---- */
+  /* ---- beat 6: ล้างบทสนทนาเดิม แล้วทยอยเปิดคนละแชทใน viewport เดิม ---- */
   function more() {
-    sendEl.classList.add("is-gone");
-    TKS.forEach(function (id, i) {
-      at(420 + i * 200, function () { el(id).classList.add("is-on"); });
-    });
+    hilite(null);
+    showMore(true);
+    var fileN = el("file-n");
+    fileN.classList.remove("is-pulse");
+    fileN.offsetHeight;
+    fileN.classList.add("is-pulse");
+    at(760, function () { fileN.classList.remove("is-pulse"); });
   }
 
   var STEP = { 2: toFile, 3: ticket1, 4: answer1, 5: ticket2, 6: more };
