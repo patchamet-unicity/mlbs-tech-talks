@@ -3,8 +3,8 @@
 ## Stage
 
 คิดหัวข้อ ✅ → outline ✅ → theme สี ✅ → ตัวละคร ✅ →
-**สไลด์ 1–6 ทำแล้ว ✅** → **Agent Harness maze ทำ 8 beats แล้ว ✅**
-→ เพิ่มสไลด์คั่นเข้า Agent Harness ก่อนหน้า maze → Growth Intelligence / สรุป
+**สไลด์ 1–6 ทำแล้ว ✅** → **Agent Harness intro 5 beats ทำแล้ว ✅**
+→ **Agent Harness maze 8 beats ทำแล้ว ✅** → Growth Intelligence / สรุป
 
 ## State
 
@@ -37,7 +37,8 @@ AI ตัวอื่นอ่านแล้วเข้าใจได้เ�
 | `slides/docs/04-prompt.md` | สไลด์ 4 เต็มๆ พร้อมกับดัก |
 | `slides/docs/05-context.md` | สไลด์ 5 เต็มๆ พร้อมกับดัก |
 | `slides/docs/06-context-files.md` | สไลด์ 6 ทั้ง 9 beats, mock context docs, tree transitions และข้อควรระวัง |
-| `slides/docs/07-agent.md` | แนวทาง Growth Intelligence Harness, workflow, outputs และ guardrails |
+| `slides/docs/07-agent.md` | Intro เข้า Agent Harness: ส่งพลัง สูบองค์ประกอบ และโคจรรอบหุ่น 5 beats |
+| `slides/docs/08-agent.md` | เขาวงกต 8 beats + Growth Intelligence workflow, outputs และ guardrails |
 
 ## สไลด์ที่ทำเสร็จแล้ว
 
@@ -239,33 +240,43 @@ AI ตัวอื่นอ่านแล้วเข้าใจได้เ�
 - แท็บ preview ถูกคืนไว้ที่ Beat 9; HTTP server ใช้ `python -m http.server 8777`
 - user เดินหน้ามาทำสไลด์ 7 แล้ว จึงไม่มี implementation ค้างในสไลด์ 6
 
-## ที่ยังไม่ได้ทำ
+## สไลด์ Agent Harness ล่าสุด
 
-- **`slides/07-agent.html` สร้างแล้ว** เป็นเขาวงกตเต็มจอ 8 beats เปรียบเทียบ
+- **`slides/07-agent.html` เป็น intro 5 beats แล้ว**: กลับมาใช้พื้น กรอบ title,
+  เส้นพื้น, pips และ animation แบบ `01-title.html`; คนส่งก้อนพลัง Harness ให้หุ่น
+  หุ่นชาร์จและสูบ Context, Tool, Decision, Human และ Verify เข้ามา จากนั้น Emoji
+  ขนาดเล็กไม่มีกรอบ/label หมุนตามวงรีจริงรอบหุ่น หางแสงคำนวณจากตำแหน่ง Emoji
+  ทุกเฟรมจึงไม่หลุดจากกัน และใช้ glow เบลอแทนเส้นประ โดยไม่บัง sprite
+  user ตอบ “ok” หลังรอบแก้ glow/วงรีล่าสุด
+- **`slides/08-agent.html` เป็นเขาวงกตเต็มจอ 8 beats** เปรียบเทียบ
   หุ่นตัวเดิมก่อนและหลังมี Harness; feedback รอบแรกถูกนำไปปรับแล้ว: กำแพงบาง
   สีเทา, เขาวงกต 12×6, ตัวละคร/หีบใหญ่ขึ้น, เส้นทางทองมี pulse, ป้าย Emoji+label
   ตกจากด้านบนเฉพาะ Beat 6 และค้างใน Beat 7–8, balloon มีรูปหีบ และหีบมี
   animation ตอนเปิด; user ตอบ “ok” หลังรอบแก้ล่าสุด
-- **งานแรกหลัง compact:** เพิ่มสไลด์คั่น/intro เข้าหัวข้อ Agent Harness ก่อน
-  `07-agent.html` ปัจจุบัน แล้วขยับเลขไฟล์ maze และเอกสารที่เกี่ยวข้อง
-  (ชื่อ/ภาพของ intro ยังไม่ได้คุย จึงยังไม่ควรเดา design)
 - **หน้ารวมสไลด์ยังไม่ได้ทำ** (โค้ดฝั่งสไลด์รองรับ postMessage ไว้แล้ว)
 - Narrative และ visual ของสไลด์ agent harness ยังต้องคุยต่อ แต่ use case หลัก
-  เปลี่ยนเป็น Growth Intelligence Harness แล้ว ตาม `slides/docs/07-agent.md`
+  เปลี่ยนเป็น Growth Intelligence Harness แล้ว ตาม `slides/docs/08-agent.md`
 - ตัวละครยังไม่มีสีหน้า/อารมณ์อื่น มีแค่หน้าปกติ
+
+### Verification ล่าสุดของสไลด์ 07
+
+- inline JavaScript syntax และ `git diff --check` ผ่าน
+- เปิดด้วย Edge headless ที่ 1280×720 แล้วครบทั้ง 5 beats
+- ตรวจช่วงสูบและวงโคจรจริงแล้ว ปลาย trail กับกึ่งกลาง Emoji คลาดกันต่ำกว่า 1px
+- forward ไป Beat 5, back ไป Beat 4 และ reset กลับ Beat 1 ทำงาน
+- navigation `06-context-files.html → 07-agent.html → 08-agent.html`
+  และย้อนกลับทำงาน
+- local preview server ใช้ `python -m http.server 8777`
 
 **คำถามที่ user ยังไม่ตอบ:** จะทำให้ปุ่มควบคุมหายไปเองเมื่อไม่ขยับเมาส์ 2 วิไหม
 (เพิ่มได้ทุกสไลด์ แต่ยังไม่ใช่งานรอบปัจจุบัน)
 
 ## Next action
 
-1. คุย concept ของสไลด์คั่น/intro เข้า Agent Harness กับ user ก่อนลงมือ
-2. แทรก intro เป็นหมายเลข 07 แล้วขยับ `07-agent.html` และ
-   `slides/docs/07-agent.md` ปัจจุบันไปหมายเลขถัดไป พร้อมอัปเดต PREV/NEXT,
-   docs index และ HANDOFF ทุกจุด
-3. เปิด browser ตรวจ navigation จากสไลด์ 6 → intro → maze และตรวจ maze 8 beats
-   ว่ายังเดินหน้า/ย้อน/reset ได้เหมือนเดิม
-4. จากนั้นออกแบบช่วง Growth Intelligence Harness
+1. คุยและออกแบบสไลด์ถัดไปของช่วง Growth Intelligence Harness
    ที่รับทั้ง user request และ scheduled job พร้อม Context/Tools หลายชุด,
-   `[Decision]` และ `[Human]` approval gate
-5. หลังสไลด์เนื้อหาครบ ค่อยทำหน้ารวมสไลด์ที่โหลดแต่ละหน้าใน iframe
+   `[Decision]` และ `[Human]` approval gate โดยใช้รายละเอียดใน
+   `slides/docs/08-agent.md`
+2. ตัดสินใจกับ user ว่าสไลด์แรกของ use case จะเปิดด้วย trigger สองแบบ
+   หรือแสดง workflow ตั้งแต่รับโจทย์ถึงสร้าง ticket
+3. หลังสไลด์เนื้อหาครบ ค่อยทำหน้ารวมสไลด์ที่โหลดแต่ละหน้าใน iframe
