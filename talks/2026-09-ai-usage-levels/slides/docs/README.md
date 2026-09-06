@@ -10,6 +10,8 @@
 | [03-chat.md](03-chat.md) | `../03-chat.html` — บทสนทนา IT support 9 ข้อความ ระดับ 01 Chat |
 | [04-prompt.md](04-prompt.md) | `../04-prompt.html` — ยุบ 9 ข้อความเป็นพรอมต์เดียว ระดับ 02 Prompt |
 | [05-context.md](05-context.md) | `../05-context.html` — ยกของที่ซ้ำไปไว้ในไฟล์เดียว ระดับ 03 Context |
+| [06-context-files.md](06-context-files.md) | `../06-context-files.html` — Context ที่ประกอบจากหลายไฟล์ |
+| [07-agent.md](07-agent.md) | `../07-agent.html` — เขาวงกตก่อนและหลังมี Agent Harness |
 
 ## สิ่งที่ใช้ร่วมกันทุกสไลด์ (อ่านก่อน)
 

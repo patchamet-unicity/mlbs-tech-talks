@@ -3,8 +3,8 @@
 ## Stage
 
 คิดหัวข้อ ✅ → outline ✅ → theme สี ✅ → ตัวละคร ✅ →
-**สไลด์ 1–5 เสร็จ ✅** → **สไลด์ 6 ทำครบ 9 beats แล้ว (Beat 9 รอ user ดูรอบสุดท้าย)**
-→ สไลด์ agent harness / สรุป
+**สไลด์ 1–6 ทำแล้ว ✅** → **Agent Harness maze ทำ 8 beats แล้ว ✅**
+→ เพิ่มสไลด์คั่นเข้า Agent Harness ก่อนหน้า maze → Growth Intelligence / สรุป
 
 ## State
 
@@ -37,6 +37,7 @@ AI ตัวอื่นอ่านแล้วเข้าใจได้เ�
 | `slides/docs/04-prompt.md` | สไลด์ 4 เต็มๆ พร้อมกับดัก |
 | `slides/docs/05-context.md` | สไลด์ 5 เต็มๆ พร้อมกับดัก |
 | `slides/docs/06-context-files.md` | สไลด์ 6 ทั้ง 9 beats, mock context docs, tree transitions และข้อควรระวัง |
+| `slides/docs/07-agent.md` | แนวทาง Growth Intelligence Harness, workflow, outputs และ guardrails |
 
 ## สไลด์ที่ทำเสร็จแล้ว
 
@@ -236,14 +237,21 @@ AI ตัวอื่นอ่านแล้วเข้าใจได้เ�
 - Beat 9 ล่าสุดผ่าน JavaScript syntax, `git diff --check`, browser flow Beat 8 ↔ 9,
   label/overflow checks และตรวจภาพที่ 1280×720 แล้ว
 - แท็บ preview ถูกคืนไว้ที่ Beat 9; HTTP server ใช้ `python -m http.server 8777`
-- งานล่าสุดยังต้องให้ user ดู Beat 9 รอบสุดท้ายหลังกลับมา ก่อนถือว่าปิดสไลด์ 6
+- user เดินหน้ามาทำสไลด์ 7 แล้ว จึงไม่มี implementation ค้างในสไลด์ 6
 
 ## ที่ยังไม่ได้ทำ
 
-- **สไลด์ agent harness ยังไม่มีไฟล์** และจะเป็น `07-agent.html`
+- **`slides/07-agent.html` สร้างแล้ว** เป็นเขาวงกตเต็มจอ 8 beats เปรียบเทียบ
+  หุ่นตัวเดิมก่อนและหลังมี Harness; feedback รอบแรกถูกนำไปปรับแล้ว: กำแพงบาง
+  สีเทา, เขาวงกต 12×6, ตัวละคร/หีบใหญ่ขึ้น, เส้นทางทองมี pulse, ป้าย Emoji+label
+  ตกจากด้านบนเฉพาะ Beat 6 และค้างใน Beat 7–8, balloon มีรูปหีบ และหีบมี
+  animation ตอนเปิด; user ตอบ “ok” หลังรอบแก้ล่าสุด
+- **งานแรกหลัง compact:** เพิ่มสไลด์คั่น/intro เข้าหัวข้อ Agent Harness ก่อน
+  `07-agent.html` ปัจจุบัน แล้วขยับเลขไฟล์ maze และเอกสารที่เกี่ยวข้อง
+  (ชื่อ/ภาพของ intro ยังไม่ได้คุย จึงยังไม่ควรเดา design)
 - **หน้ารวมสไลด์ยังไม่ได้ทำ** (โค้ดฝั่งสไลด์รองรับ postMessage ไว้แล้ว)
-- ไอเดียนำเสนอสไลด์ agent harness / สรุปยังไม่ได้ออกแบบ
-  แต่ use case ล็อกแล้วว่าเป็นเคส IT support เดียวกันตลอด
+- Narrative และ visual ของสไลด์ agent harness ยังต้องคุยต่อ แต่ use case หลัก
+  เปลี่ยนเป็น Growth Intelligence Harness แล้ว ตาม `slides/docs/07-agent.md`
 - ตัวละครยังไม่มีสีหน้า/อารมณ์อื่น มีแค่หน้าปกติ
 
 **คำถามที่ user ยังไม่ตอบ:** จะทำให้ปุ่มควบคุมหายไปเองเมื่อไม่ขยับเมาส์ 2 วิไหม
@@ -251,10 +259,13 @@ AI ตัวอื่นอ่านแล้วเข้าใจได้เ�
 
 ## Next action
 
-1. ให้ user ดู Beat 9 ของ `slides/06-context-files.html` ที่ localhost:8777
-   โดยเฉพาะรูปแบบ mini document tree, labels และจังหวะที่ 11 ชุดค่อย ๆ เพิ่มขึ้น
-2. ถ้า Beat 9 ผ่าน ให้ถือว่าสไลด์ 6 ปิดงาน แล้วคุยคอนเซปต์สไลด์ 7
-   `07-agent.html` ระดับ 04 Agent Harness ก่อนลงมือ
-3. จุดเชื่อมที่สไลด์ 7 ต้องรับต่อ: harness ที่คนทำเองเป็นระบบที่เลือก context,
-   เปิดไฟล์ และเรียก tools ตามที่สไลด์ 6 ปูไว้
-4. หลังสไลด์ 7 ค่อยทำหน้ารวมสไลด์ที่โหลดแต่ละหน้าใน iframe
+1. คุย concept ของสไลด์คั่น/intro เข้า Agent Harness กับ user ก่อนลงมือ
+2. แทรก intro เป็นหมายเลข 07 แล้วขยับ `07-agent.html` และ
+   `slides/docs/07-agent.md` ปัจจุบันไปหมายเลขถัดไป พร้อมอัปเดต PREV/NEXT,
+   docs index และ HANDOFF ทุกจุด
+3. เปิด browser ตรวจ navigation จากสไลด์ 6 → intro → maze และตรวจ maze 8 beats
+   ว่ายังเดินหน้า/ย้อน/reset ได้เหมือนเดิม
+4. จากนั้นออกแบบช่วง Growth Intelligence Harness
+   ที่รับทั้ง user request และ scheduled job พร้อม Context/Tools หลายชุด,
+   `[Decision]` และ `[Human]` approval gate
+5. หลังสไลด์เนื้อหาครบ ค่อยทำหน้ารวมสไลด์ที่โหลดแต่ละหน้าใน iframe
