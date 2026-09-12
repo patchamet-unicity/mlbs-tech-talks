@@ -5,7 +5,7 @@
 คิดหัวข้อ ✅ → outline ✅ → theme สี ✅ → ตัวละคร ✅ →
 **สไลด์ 1–6 ทำแล้ว ✅** → **Agent Harness intro 5 beats ทำแล้ว ✅**
 → **Agent Harness maze 8 beats ทำแล้ว ✅** →
-**Slide 09 Opening + INTAKE 10 beats ทำแล้ว ✅** → TRIAGE–DISPATCH / สรุป
+**Slide 09 Inbox-to-Ticket 70 beats ทำครบแล้ว ✅** → สรุป / หน้ารวม
 
 ## State
 
@@ -40,7 +40,7 @@ AI ตัวอื่นอ่านแล้วเข้าใจได้เ�
 | `slides/docs/06-context-files.md` | สไลด์ 6 ทั้ง 9 beats, mock context docs, tree transitions และข้อควรระวัง |
 | `slides/docs/07-agent.md` | Intro เข้า Agent Harness: ส่งพลัง สูบองค์ประกอบ และโคจรรอบหุ่น 5 beats |
 | `slides/docs/08-agent.md` | เขาวงกต 8 beats + Growth Intelligence workflow, outputs และ guardrails |
-| `slides/docs/09-inbox-to-ticket.md` | Inbox-to-Ticket workflow 6 phases + implementation state ของ INTAKE prototype |
+| `slides/docs/09-inbox-to-ticket.md` | Inbox-to-Ticket workflow 6 phases / 70 beats + visual และ QA state |
 
 ## สไลด์ที่ทำเสร็จแล้ว
 
@@ -273,45 +273,36 @@ AI ตัวอื่นอ่านแล้วเข้าใจได้เ�
 **คำถามที่ user ยังไม่ตอบ:** จะทำให้ปุ่มควบคุมหายไปเองเมื่อไม่ขยับเมาส์ 2 วิไหม
 (เพิ่มได้ทุกสไลด์ แต่ยังไม่ใช่งานรอบปัจจุบัน)
 
-## สไลด์ 09 — Inbox-to-Ticket Harness (ทำถึง INTAKE แล้ว 2026-09-12)
+## สไลด์ 09 — Inbox-to-Ticket Harness (70 beats, user approved 2026-09-12)
 
 ไฟล์งานคือ `slides/09-inbox-to-ticket.html` และเอกสารคู่กันคือ
-`slides/docs/09-inbox-to-ticket.md`; user อนุมัติท่อนเปิด + INTAKE ล่าสุดด้วยคำว่า
-“เยี่ยมเลย” หลังเปลี่ยน caption ทุก beat เป็นภาษาไทยและเพิ่ม Emoji หน้า body title
+`slides/docs/09-inbox-to-ticket.md`
 
 - Workflow ล็อกเป็น 6 phases: `INTAKE` → `TRIAGE` → `INVESTIGATE` →
   `SYNTHESIZE` → `OWNERSHIP` → `DISPATCH`
-- `INVESTIGATE` ตรวจ Business Context กับ Technical Evidence พร้อมกัน;
-  ต้อง `SYNTHESIZE` และล็อก scope ก่อนค่อยหา `OWNERSHIP`
-- Slide 09 ปัจจุบันมี **10 beats** และทำเฉพาะ Opening + INTAKE เพื่อใช้เป็น visual
-  template ก่อนขยายอีกห้า phases
-- Beat 1: `User request → ? → Final Result`; คนกับหุ่นยืนซ้ายมองเส้นชัย
-- Beats 2–8: คนกับหุ่นหาย แล้ว Markdown 7 ใบแสดงกลางจอทีละใบ; ใบที่ active
-  อ่านได้เต็ม ใบก่อนหน้าค้างเป็นกองทางซ้าย ตามภาษาภาพของ `06-context-files.html`
-- เอกสาร 7 ใบแทน `[INPUT]`, `[CTX]`, `[TOOL]`, `[DECISION]`, `[HUMAN]`,
-  `[OUTPUT]`, `[VERIFY]`; ใช้ชื่อจริงตาม `slides/docs/09-inbox-to-ticket.md`
-- Beat 9: รวมเอกสารทั้งเจ็ดเป็น INTAKE working set
-- Beat 10: ยุบทั้งชุดเข้า `[INTAKE]`; route กลายเป็น
-  `User request → [INTAKE] → ? → Final Result` และมีรายการ
-  `Emoji + filename.md` ห้อยใต้ INTAKE แบบเรียบ **ไม่ใช้ boxed tree**
-- captions ของทั้ง 10 beats เป็นภาษาไทย; Emoji หน้า card title จับคู่กับ Emoji
-  ใน final file list
-- `PREV` ชี้ `08-agent.html`; `NEXT` ยังว่าง และ `08-agent.html` ยังไม่ได้ชี้ NEXT
-  มาหน้านี้ระหว่างที่สไลด์ 09 ยังทำไม่ครบ
-- ผ่าน inline JavaScript syntax, `git diff --check`, headless 1280×720 ทุก beat,
-  back/reset/rapid navigation, caption/Emoji clipping, route overlap และ overflow checks;
-  ไม่พบ runtime error นอกจาก favicon 404 ของ local server
-- **อย่ารื้อ INTAKE ที่อนุมัติแล้ว**; ใช้วงจร “Markdown หลายใบทีละใบ → รวมกอง →
-  ยุบเข้า checkpoint → เหลือ Emoji file list ใต้ phase” เป็น template ของ phase ถัดไป
+- ทุก phase ใช้ animation grammar เดียวกับ INTAKE: เปิด Markdown เต็มใบทีละใบ,
+  ใบก่อนหน้าค้างเป็นกอง, รวมเป็น working set, ยุบเข้า checkpoint แล้วแสดง tree
+  `Emoji + filename.md` ใต้ phase
+- tree ของ phase ที่เสร็จแล้วต้องคงอยู่ใน horizontal world; กล้องเลื่อนไปหา phase
+  ปัจจุบัน และ final overview ต้องเห็นครบทั้งหก tree
+- `INVESTIGATE` fan-out Business / Technical และมี technical Markdown แยกจริง
+  สำหรับ structure, web, API, database, logs และ code
+- Beat map: 1–10 INTAKE, 11–20 TRIAGE, 21–33 INVESTIGATE, 34–43 SYNTHESIZE,
+  44–54 OWNERSHIP, 55–68 DISPATCH, 69 overview, 70 finish
+- captions ทุก beatเป็นภาษาไทย; title ใน body ของทุกการ์ดมี Emoji
+- `PREV` ของสไลด์ 09 ชี้ `08-agent.html`; `NEXT` ยังว่าง;
+  `08-agent.html` เชื่อม NEXT มาหน้านี้แล้ว
+- ผ่าน headless Chrome ครบ 70 beats ที่ 1280×720, back/reset/rapid navigation,
+  tree milestones และ card overflow checks แล้ว
+- user เปิดดูเวอร์ชัน `?v=8` แล้วตอบว่า “สวยงาม”; ถือว่า Slide 09 ผ่านและไม่เหลือ
+  feedback ที่ต้องแก้ในจุดพักนี้
+- อย่ากลับไปใช้ card grid หรือ diagram สรุปสาม beatต่อ phase; ทุก phase ต้องค่อย ๆ
+  สร้างกอง Markdown แบบเดียวกับ INTAKE
 
 ## Next action
 
-1. ทำ `slides/09-inbox-to-ticket.html` ต่อจาก Beat 10 ให้จบอีกห้า phases โดยเริ่ม
-   `TRIAGE`; คง route, document-deck grammar, caption ไทย และ Emoji file list
-   ของ INTAKE ที่ user อนุมัติแล้ว
-2. หลัง `TRIAGE` ทำ `INVESTIGATE` ให้เห็น Business Context / Technical Evidence
-   ทำพร้อมกัน แล้วรวมกลับใน `SYNTHESIZE`; ค่อยเปิด `OWNERSHIP` หลัง scope ถูกยืนยัน
-3. จบด้วย `DISPATCH`: Human approval → parent/child Tickets → Verify → ตัวละคร
-   กลับมาเดินตาม route ถึง Final Result
-4. เมื่อ Slide 09 ครบ ค่อยต่อ navigation จาก `08-agent.html`, อัปเดต docs/HANDOFF,
-   ตรวจทุก beat ที่ 1280×720 แล้วทำหน้ารวมสไลด์ภายหลัง
+1. พักงานไว้ก่อนตามคำขอของ user
+2. เมื่อกลับมา ให้เริ่มจากคุยแนวคิดและภาพของ **สไลด์ปิด**; ยังไม่มีแบบที่ตกลงแล้ว
+   จึงห้ามเดาแล้วลงมือทำทันที
+3. หลังสไลด์ปิดผ่าน ค่อยเชื่อม `NEXT` จาก Slide 09 และพิจารณาหน้ารวม
+4. ทดสอบ iframe navigation ทั้งชุดเมื่อสร้างหน้ารวมแล้ว

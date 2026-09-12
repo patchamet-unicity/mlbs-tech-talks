@@ -1,45 +1,51 @@
-# Slide 09 Draft — Inbox-to-Ticket Harness
+# Slide 09 — Inbox-to-Ticket Harness
 
 ## Status
 
-`09-inbox-to-ticket.html` ทำท่อนเปิดและ `INTAKE` prototype ครบ 10 beats แล้วเมื่อ
-2026-09-12; user ตอบ “เยี่ยมเลย” หลังรอบแก้ caption เป็นภาษาไทยและเติม Emoji
-หน้า title ของเอกสารทั้งเจ็ดใบ ส่วน `TRIAGE` ถึง `DISPATCH` ยังไม่ได้ implement
+`09-inbox-to-ticket.html` ใช้โครง 70 beats ครบตั้งแต่ Opening / `INTAKE`
+ไปจนถึง `TRIAGE`, `INVESTIGATE`, `SYNTHESIZE`, `OWNERSHIP`,
+`DISPATCH` และ Final Result
 
-สไลด์นี้เป็นตัวอย่างงานจริงต่อจาก `08-agent.html`: Harness รับเมลและเอกสารแนบ
-แตกประเด็น ตรวจ business rules ไปสำรวจระบบที่เกี่ยวข้อง แล้วเตรียม Ticket ให้ทีมที่
-รับผิดชอบ โดยมี Human approval ก่อนสร้างผลกระทบจริง
+สไลด์นี้เป็นตัวอย่างงานจริงต่อจาก `08-agent.html`: ทุก phase ใช้ภาษาภาพเดียวกับ
+`INTAKE` คือเปิด Markdown ทีละใบ คงใบก่อนหน้าเป็นกอง รวมเป็น working set
+แล้วยุบเข้า checkpoint บน route พร้อม tree รายชื่อไฟล์ที่ค้างอยู่ตลอด
 
-## Current implementation — Opening + INTAKE
+## Current implementation — 70 beats
 
-- **10 beats**: เปิด route → แสดง Markdown 7 ใบทีละใบ → รวมเป็น working set →
-  ยุบเข้า `[INTAKE]`
-- Beat 1 แสดง `User request → ? → Final Result`; คนและหุ่นยืนฝั่งซ้ายมองไปทาง
-  เส้นชัย ก่อนหายจากฉากเมื่อเริ่มอธิบายเอกสาร
-- Beats 2–8 แสดงเอกสารกลางจอทีละใบ โดยใบปัจจุบันอ่านได้เต็ม ส่วนใบก่อนหน้าค้าง
-  เป็นกองทางซ้าย ใช้ภาษาภาพจาก `06-context-files.html` แต่จัดกลางเวที
-- เอกสารทั้งเจ็ดใบคือ `email-request.md` `[INPUT]`, `inbox-rules.md` `[CTX]`,
-  `email-reader.md` `[TOOL]`, `intake-decision.md` `[DECISION]`,
-  `request-clarification.md` `[HUMAN]`, `request-package.md` `[OUTPUT]` และ
-  `intake-checks.md` `[VERIFY]`
-- Beat 9 รวมเอกสารทั้งเจ็ดเป็นกองเดียวพร้อมข้อความว่าเป็น INTAKE working set
-- Beat 10 ยุบกองเข้า route เป็น
-  `User request → [INTAKE] → ? → Final Result`; ใต้ `[INTAKE]` แสดงรายการเรียบ
-  `Emoji + filename.md` ทั้งเจ็ดใบ **ไม่ใช้ boxed tree**
-- caption ใต้สไลด์ของ Beats 1–10 เป็นภาษาไทยทั้งหมด; body title ของการ์ดใช้ Emoji
-  ชุดเดียวกับรายการสุดท้ายตามที่ user อนุมัติ
-- `PREV = "08-agent.html"`; `NEXT` ยังว่างระหว่างทำสไลด์นี้ต่อ
+- **Beats 1–10 — Opening + INTAKE**: เปิด route → แสดง Markdown 7 ใบทีละใบ →
+  รวมเป็น working set → ยุบเข้า `[INTAKE]`
+- **Beats 11–20 — TRIAGE**: แสดง Markdown 8 ใบทีละใบ → รวม → ยุบเข้า
+  `[TRIAGE]`
+- **Beats 21–33 — INVESTIGATE**: รับ `triaged-work-items.md` แล้ว fan-out เป็น
+  Business / Technical; แสดงเอกสารสองฝั่งเป็นคู่ ๆ ก่อนรวมผลและยุบเข้า
+  `[INVESTIGATE]`
+- Technical Evidence แตกเป็นไฟล์จริงระดับ `system-structure.md`,
+  `web-check.md`, `api-check.md`, `database-check.md`, `log-check.md` และ
+  `code-check.md` ไม่ใช้ไฟล์ umbrella ใบเดียว
+- **Beats 34–43 — SYNTHESIZE**: แสดง Markdown 8 ใบ → รวมหลักฐาน ประเมิน
+  confidence และล็อก scope → ยุบเข้า `[SYNTHESIZE]`
+- **Beats 44–54 — OWNERSHIP**: แสดง Markdown 9 ใบ → ระบุ owner, approver,
+  dependencies จาก confirmed scope → ยุบเข้า `[OWNERSHIP]`
+- **Beats 55–68 — DISPATCH**: แสดง Markdown 12 ใบ → เตรียม parent/child tickets,
+  human approval และ verify ticket set → ยุบเข้า `[DISPATCH]`
+- **Beats 69–70 — Final Result**: zoom out เห็น route และ tree ทั้งหก phase
+  จากนั้นคนกับหุ่นเคลื่อนไปถึงเส้นชัย
+- tree ใต้ phase ที่เสร็จแล้วคงอยู่ใน world เสมอ; กล้องเลื่อนไปตาม phase ปัจจุบัน
+  และกองการ์ดใหม่สามารถซ้อนบัง tree เก่าได้ตามจังหวะการเล่า
+- caption ทุก beat เป็นภาษาไทย; title ใน body ของทุกการ์ดมี Emoji
+- `PREV = "08-agent.html"`; สไลด์ 08 เชื่อม `NEXT = "09-inbox-to-ticket.html"`;
+  `NEXT` ของสไลด์ 09 ยังว่าง
 - รองรับ controls, AUTO, iframe postMessage, reduced motion และ rebuild state
   สำหรับ forward/back/reset ตามสไลด์ก่อนหน้า
 
 ### Verification ล่าสุด
 
 - inline JavaScript syntax และ `git diff --check` ผ่าน
-- headless browser 1280×720 ผ่านครบ Beats 1–10, back, reset และ rapid navigation
-- เอกสารทั้งเจ็ดใบขึ้นเป็น active readable card ครบ; caption ไทยและ Emoji title
-  ไม่ล้นหรือถูกตัด
-- route Beat 10 ไม่ชน `Final Result`; ไม่พบ viewport overflow หรือ runtime error
-  (มีเพียง `/favicon.ico` 404 ของ local server)
+- headless Chrome ผ่านครบ 70 beats ที่ viewport 1280×720 รวม back, reset และ
+  rapid navigation
+- ทุก milestone มีจำนวน persistent trees ถูกต้อง: 2 / 3 / 4 / 5 / 6
+- ไม่พบ active Markdown card ล้นกรอบ และ INVESTIGATE tree มีไฟล์ structure,
+  web, API, database, logs และ code ครบ
 
 ## Working name
 
@@ -242,12 +248,12 @@ Tree เต็มชุดใหญ่เกินกว่าจะเปิด
 ภาพควรทำให้เห็นว่า Context และ Tools ถูกเลือกตามประเภทงาน ไม่ได้เปิดทุกอย่าง
 พร้อมกันทุกครั้ง และ `[Human]` ต้องยังเด่นเหมือนใน `08-agent.html`
 
-## Open decisions
+## Resolved decisions
 
-- Use case นี้จะมาแทน Growth Intelligence Harness ใน `08-agent.md` หรือเป็น
-  ตัวอย่าง workflow อีกชุดหนึ่ง
-- Trigger หลักจะเป็นเมลเข้าอย่างเดียว หรือคง Scheduled inbox check ไว้ด้วย
-- หนึ่งเมลตัวอย่างควรมีหนึ่งประเด็นเพื่อเล่าง่าย หรือมีสองประเด็นเพื่อโชว์การแตก
-  parent/child tickets
-- Human approval จะตรวจ Ticket plan ทั้งก้อนครั้งเดียว หรืออนุมัติแยกตามทีม
-- จำนวน beats และระดับข้อความที่อ่านได้จริงบนสไลด์
+- สไลด์ 09 เป็นตัวอย่าง workflow ต่อจากแนวคิด Agent Harness ในสไลด์ 08
+- จุดเริ่มบนภาพใช้ `User request` จากอีเมลและ attachment
+- TRIAGE ใช้ Work Item A/B เพื่อสื่อว่าหนึ่ง request แตกได้หลายงาน โดยไม่ใส่
+  รายละเอียดเคสจนแน่นเกินไป
+- Human approval ตรวจ Ticket plan ทั้งก้อนหนึ่งครั้งก่อนสร้างจริง
+- ใช้ 70 beats: ทุก phase อธิบายเอกสารทีละใบด้วย animation grammar เดียวกับ
+  INTAKE; INVESTIGATE เพิ่ม fan-out Business / Technical ภายใน grammar เดิม
