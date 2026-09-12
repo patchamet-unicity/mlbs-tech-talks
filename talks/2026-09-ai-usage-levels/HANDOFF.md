@@ -285,6 +285,9 @@ AI ตัวอื่นอ่านแล้วเข้าใจได้เ�
   `Emoji + filename.md` ใต้ phase
 - tree ของ phase ที่เสร็จแล้วต้องคงอยู่ใน horizontal world; กล้องเลื่อนไปหา phase
   ปัจจุบัน และ final overview ต้องเห็นครบทั้งหก tree
+- ระหว่างอ่าน Markdown ใช้ Focus mode: workflow ด้านหลังเหลือ opacity 16%,
+  active card ชัดเต็ม, กองเก่าจางลง และคืน workflow เป็น 100% ตอน collapse;
+  INVESTIGATE lane โฟกัส Business / Technical พร้อมกันสองใบ
 - `INVESTIGATE` fan-out Business / Technical และมี technical Markdown แยกจริง
   สำหรับ structure, web, API, database, logs และ code
 - Beat map: 1–10 INTAKE, 11–20 TRIAGE, 21–33 INVESTIGATE, 34–43 SYNTHESIZE,
@@ -294,14 +297,14 @@ AI ตัวอื่นอ่านแล้วเข้าใจได้เ�
   `08-agent.html` เชื่อม NEXT มาหน้านี้แล้ว
 - ผ่าน headless Chrome ครบ 70 beats ที่ 1280×720, back/reset/rapid navigation,
   tree milestones และ card overflow checks แล้ว
-- user เปิดดูเวอร์ชัน `?v=8` แล้วตอบว่า “สวยงาม”; ถือว่า Slide 09 ผ่านและไม่เหลือ
-  feedback ที่ต้องแก้ในจุดพักนี้
+- user เปิดดู Focus mode เวอร์ชัน `?v=12` แล้วตอบว่า “เยี่ยม”; ถือว่า Slide 09
+  ผ่านครบทั้งเนื้อหา animation และ visual hierarchy
 - อย่ากลับไปใช้ card grid หรือ diagram สรุปสาม beatต่อ phase; ทุก phase ต้องค่อย ๆ
   สร้างกอง Markdown แบบเดียวกับ INTAKE
 
 ## Next action
 
-1. พักงานไว้ก่อนตามคำขอของ user
+1. พักงานไว้ก่อนตามคำขอเดิมของ user
 2. เมื่อกลับมา ให้เริ่มจากคุยแนวคิดและภาพของ **สไลด์ปิด**; ยังไม่มีแบบที่ตกลงแล้ว
    จึงห้ามเดาแล้วลงมือทำทันที
 3. หลังสไลด์ปิดผ่าน ค่อยเชื่อม `NEXT` จาก Slide 09 และพิจารณาหน้ารวม

@@ -32,6 +32,11 @@
   จากนั้นคนกับหุ่นเคลื่อนไปถึงเส้นชัย
 - tree ใต้ phase ที่เสร็จแล้วคงอยู่ใน world เสมอ; กล้องเลื่อนไปตาม phase ปัจจุบัน
   และกองการ์ดใหม่สามารถซ้อนบัง tree เก่าได้ตามจังหวะการเล่า
+- ระหว่างเปิด Markdown ใช้ Focus mode: route และ tree ด้านหลังลดเหลือ 16%,
+  active card ชัดเต็ม, การ์ดก่อนหน้าลดน้ำหนัก และ phase title ทำหน้าที่เป็น
+  breadcrumb เหนือการ์ด; เมื่อยุบเข้า checkpoint จึงคืน workflow เป็น 100%
+- ช่วง INVESTIGATE มอง Business / Technical เป็น focus group เดียว จึงมี active
+  card สองใบพร้อมกัน ส่วนหัวสองกิ่งหายเมื่อ fan-in กลับมาที่ findings
 - caption ทุก beat เป็นภาษาไทย; title ใน body ของทุกการ์ดมี Emoji
 - `PREV = "08-agent.html"`; สไลด์ 08 เชื่อม `NEXT = "09-inbox-to-ticket.html"`;
   `NEXT` ของสไลด์ 09 ยังว่าง
@@ -46,6 +51,8 @@
 - ทุก milestone มีจำนวน persistent trees ถูกต้อง: 2 / 3 / 4 / 5 / 6
 - ไม่พบ active Markdown card ล้นกรอบ และ INVESTIGATE tree มีไฟล์ structure,
   web, API, database, logs และ code ครบ
+- Focus mode ผ่านครบ 70 beats: background dim/restore ถูกจังหวะ, breadcrumb
+  ไม่ทับ active card และ INVESTIGATE lane มี focus พร้อมกันสองใบ
 
 ## Working name
 
