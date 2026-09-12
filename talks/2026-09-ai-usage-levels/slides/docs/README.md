@@ -13,6 +13,7 @@
 | [06-context-files.md](06-context-files.md) | `../06-context-files.html` — Context ที่ประกอบจากหลายไฟล์ |
 | [07-agent.md](07-agent.md) | `../07-agent.html` — Intro เข้า Agent Harness |
 | [08-agent.md](08-agent.md) | `../08-agent.html` — เขาวงกตก่อนและหลังมี Agent Harness |
+| [09-inbox-to-ticket.md](09-inbox-to-ticket.md) | `../09-inbox-to-ticket.html` — Inbox-to-Ticket Harness; INTAKE prototype 10 beats |
 
 ## สิ่งที่ใช้ร่วมกันทุกสไลด์ (อ่านก่อน)
 

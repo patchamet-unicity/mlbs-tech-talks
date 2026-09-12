@@ -4,7 +4,8 @@
 
 คิดหัวข้อ ✅ → outline ✅ → theme สี ✅ → ตัวละคร ✅ →
 **สไลด์ 1–6 ทำแล้ว ✅** → **Agent Harness intro 5 beats ทำแล้ว ✅**
-→ **Agent Harness maze 8 beats ทำแล้ว ✅** → Growth Intelligence / สรุป
+→ **Agent Harness maze 8 beats ทำแล้ว ✅** →
+**Slide 09 Opening + INTAKE 10 beats ทำแล้ว ✅** → TRIAGE–DISPATCH / สรุป
 
 ## State
 
@@ -39,6 +40,7 @@ AI ตัวอื่นอ่านแล้วเข้าใจได้เ�
 | `slides/docs/06-context-files.md` | สไลด์ 6 ทั้ง 9 beats, mock context docs, tree transitions และข้อควรระวัง |
 | `slides/docs/07-agent.md` | Intro เข้า Agent Harness: ส่งพลัง สูบองค์ประกอบ และโคจรรอบหุ่น 5 beats |
 | `slides/docs/08-agent.md` | เขาวงกต 8 beats + Growth Intelligence workflow, outputs และ guardrails |
+| `slides/docs/09-inbox-to-ticket.md` | Inbox-to-Ticket workflow 6 phases + implementation state ของ INTAKE prototype |
 
 ## สไลด์ที่ทำเสร็จแล้ว
 
@@ -271,12 +273,45 @@ AI ตัวอื่นอ่านแล้วเข้าใจได้เ�
 **คำถามที่ user ยังไม่ตอบ:** จะทำให้ปุ่มควบคุมหายไปเองเมื่อไม่ขยับเมาส์ 2 วิไหม
 (เพิ่มได้ทุกสไลด์ แต่ยังไม่ใช่งานรอบปัจจุบัน)
 
+## สไลด์ 09 — Inbox-to-Ticket Harness (ทำถึง INTAKE แล้ว 2026-09-12)
+
+ไฟล์งานคือ `slides/09-inbox-to-ticket.html` และเอกสารคู่กันคือ
+`slides/docs/09-inbox-to-ticket.md`; user อนุมัติท่อนเปิด + INTAKE ล่าสุดด้วยคำว่า
+“เยี่ยมเลย” หลังเปลี่ยน caption ทุก beat เป็นภาษาไทยและเพิ่ม Emoji หน้า body title
+
+- Workflow ล็อกเป็น 6 phases: `INTAKE` → `TRIAGE` → `INVESTIGATE` →
+  `SYNTHESIZE` → `OWNERSHIP` → `DISPATCH`
+- `INVESTIGATE` ตรวจ Business Context กับ Technical Evidence พร้อมกัน;
+  ต้อง `SYNTHESIZE` และล็อก scope ก่อนค่อยหา `OWNERSHIP`
+- Slide 09 ปัจจุบันมี **10 beats** และทำเฉพาะ Opening + INTAKE เพื่อใช้เป็น visual
+  template ก่อนขยายอีกห้า phases
+- Beat 1: `User request → ? → Final Result`; คนกับหุ่นยืนซ้ายมองเส้นชัย
+- Beats 2–8: คนกับหุ่นหาย แล้ว Markdown 7 ใบแสดงกลางจอทีละใบ; ใบที่ active
+  อ่านได้เต็ม ใบก่อนหน้าค้างเป็นกองทางซ้าย ตามภาษาภาพของ `06-context-files.html`
+- เอกสาร 7 ใบแทน `[INPUT]`, `[CTX]`, `[TOOL]`, `[DECISION]`, `[HUMAN]`,
+  `[OUTPUT]`, `[VERIFY]`; ใช้ชื่อจริงตาม `slides/docs/09-inbox-to-ticket.md`
+- Beat 9: รวมเอกสารทั้งเจ็ดเป็น INTAKE working set
+- Beat 10: ยุบทั้งชุดเข้า `[INTAKE]`; route กลายเป็น
+  `User request → [INTAKE] → ? → Final Result` และมีรายการ
+  `Emoji + filename.md` ห้อยใต้ INTAKE แบบเรียบ **ไม่ใช้ boxed tree**
+- captions ของทั้ง 10 beats เป็นภาษาไทย; Emoji หน้า card title จับคู่กับ Emoji
+  ใน final file list
+- `PREV` ชี้ `08-agent.html`; `NEXT` ยังว่าง และ `08-agent.html` ยังไม่ได้ชี้ NEXT
+  มาหน้านี้ระหว่างที่สไลด์ 09 ยังทำไม่ครบ
+- ผ่าน inline JavaScript syntax, `git diff --check`, headless 1280×720 ทุก beat,
+  back/reset/rapid navigation, caption/Emoji clipping, route overlap และ overflow checks;
+  ไม่พบ runtime error นอกจาก favicon 404 ของ local server
+- **อย่ารื้อ INTAKE ที่อนุมัติแล้ว**; ใช้วงจร “Markdown หลายใบทีละใบ → รวมกอง →
+  ยุบเข้า checkpoint → เหลือ Emoji file list ใต้ phase” เป็น template ของ phase ถัดไป
+
 ## Next action
 
-1. คุยและออกแบบสไลด์ถัดไปของช่วง Growth Intelligence Harness
-   ที่รับทั้ง user request และ scheduled job พร้อม Context/Tools หลายชุด,
-   `[Decision]` และ `[Human]` approval gate โดยใช้รายละเอียดใน
-   `slides/docs/08-agent.md`
-2. ตัดสินใจกับ user ว่าสไลด์แรกของ use case จะเปิดด้วย trigger สองแบบ
-   หรือแสดง workflow ตั้งแต่รับโจทย์ถึงสร้าง ticket
-3. หลังสไลด์เนื้อหาครบ ค่อยทำหน้ารวมสไลด์ที่โหลดแต่ละหน้าใน iframe
+1. ทำ `slides/09-inbox-to-ticket.html` ต่อจาก Beat 10 ให้จบอีกห้า phases โดยเริ่ม
+   `TRIAGE`; คง route, document-deck grammar, caption ไทย และ Emoji file list
+   ของ INTAKE ที่ user อนุมัติแล้ว
+2. หลัง `TRIAGE` ทำ `INVESTIGATE` ให้เห็น Business Context / Technical Evidence
+   ทำพร้อมกัน แล้วรวมกลับใน `SYNTHESIZE`; ค่อยเปิด `OWNERSHIP` หลัง scope ถูกยืนยัน
+3. จบด้วย `DISPATCH`: Human approval → parent/child Tickets → Verify → ตัวละคร
+   กลับมาเดินตาม route ถึง Final Result
+4. เมื่อ Slide 09 ครบ ค่อยต่อ navigation จาก `08-agent.html`, อัปเดต docs/HANDOFF,
+   ตรวจทุก beat ที่ 1280×720 แล้วทำหน้ารวมสไลด์ภายหลัง

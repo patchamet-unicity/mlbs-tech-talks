@@ -2,12 +2,44 @@
 
 ## Status
 
-Working draft จากการคุยกับ user เมื่อ 2026-09-12 ยังไม่ได้ล็อกชื่อ จำนวน beats
-หรือ visual จริง จุดประสงค์ของไฟล์นี้คือเก็บแนวคิดและ workflow ก่อนเริ่มออกแบบสไลด์
+`09-inbox-to-ticket.html` ทำท่อนเปิดและ `INTAKE` prototype ครบ 10 beats แล้วเมื่อ
+2026-09-12; user ตอบ “เยี่ยมเลย” หลังรอบแก้ caption เป็นภาษาไทยและเติม Emoji
+หน้า title ของเอกสารทั้งเจ็ดใบ ส่วน `TRIAGE` ถึง `DISPATCH` ยังไม่ได้ implement
 
 สไลด์นี้เป็นตัวอย่างงานจริงต่อจาก `08-agent.html`: Harness รับเมลและเอกสารแนบ
 แตกประเด็น ตรวจ business rules ไปสำรวจระบบที่เกี่ยวข้อง แล้วเตรียม Ticket ให้ทีมที่
 รับผิดชอบ โดยมี Human approval ก่อนสร้างผลกระทบจริง
+
+## Current implementation — Opening + INTAKE
+
+- **10 beats**: เปิด route → แสดง Markdown 7 ใบทีละใบ → รวมเป็น working set →
+  ยุบเข้า `[INTAKE]`
+- Beat 1 แสดง `User request → ? → Final Result`; คนและหุ่นยืนฝั่งซ้ายมองไปทาง
+  เส้นชัย ก่อนหายจากฉากเมื่อเริ่มอธิบายเอกสาร
+- Beats 2–8 แสดงเอกสารกลางจอทีละใบ โดยใบปัจจุบันอ่านได้เต็ม ส่วนใบก่อนหน้าค้าง
+  เป็นกองทางซ้าย ใช้ภาษาภาพจาก `06-context-files.html` แต่จัดกลางเวที
+- เอกสารทั้งเจ็ดใบคือ `email-request.md` `[INPUT]`, `inbox-rules.md` `[CTX]`,
+  `email-reader.md` `[TOOL]`, `intake-decision.md` `[DECISION]`,
+  `request-clarification.md` `[HUMAN]`, `request-package.md` `[OUTPUT]` และ
+  `intake-checks.md` `[VERIFY]`
+- Beat 9 รวมเอกสารทั้งเจ็ดเป็นกองเดียวพร้อมข้อความว่าเป็น INTAKE working set
+- Beat 10 ยุบกองเข้า route เป็น
+  `User request → [INTAKE] → ? → Final Result`; ใต้ `[INTAKE]` แสดงรายการเรียบ
+  `Emoji + filename.md` ทั้งเจ็ดใบ **ไม่ใช้ boxed tree**
+- caption ใต้สไลด์ของ Beats 1–10 เป็นภาษาไทยทั้งหมด; body title ของการ์ดใช้ Emoji
+  ชุดเดียวกับรายการสุดท้ายตามที่ user อนุมัติ
+- `PREV = "08-agent.html"`; `NEXT` ยังว่างระหว่างทำสไลด์นี้ต่อ
+- รองรับ controls, AUTO, iframe postMessage, reduced motion และ rebuild state
+  สำหรับ forward/back/reset ตามสไลด์ก่อนหน้า
+
+### Verification ล่าสุด
+
+- inline JavaScript syntax และ `git diff --check` ผ่าน
+- headless browser 1280×720 ผ่านครบ Beats 1–10, back, reset และ rapid navigation
+- เอกสารทั้งเจ็ดใบขึ้นเป็น active readable card ครบ; caption ไทยและ Emoji title
+  ไม่ล้นหรือถูกตัด
+- route Beat 10 ไม่ชน `Final Result`; ไม่พบ viewport overflow หรือ runtime error
+  (มีเพียง `/favicon.ico` 404 ของ local server)
 
 ## Working name
 
