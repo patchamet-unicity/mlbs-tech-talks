@@ -278,8 +278,8 @@ AI ตัวอื่นอ่านแล้วเข้าใจได้เ�
 ไฟล์งานคือ `slides/09-inbox-to-ticket.html` และเอกสารคู่กันคือ
 `slides/docs/09-inbox-to-ticket.md`
 
-- Workflow ล็อกเป็น 6 phases: `INTAKE` → `TRIAGE` → `INVESTIGATE` →
-  `SYNTHESIZE` → `OWNERSHIP` → `DISPATCH`
+- Workflow แสดงชื่อ 6 ด่านเป็นภาษาไทย: `รับเรื่อง` → `แยกประเด็น` → `ตรวจสอบ` →
+  `สรุปผล` → `ระบุผู้รับผิดชอบ` → `ส่งต่องาน`
 - ทุก phase ใช้ animation grammar เดียวกับ INTAKE: เปิด Markdown เต็มใบทีละใบ,
   ใบก่อนหน้าค้างเป็นกอง, รวมเป็น working set, ยุบเข้า checkpoint แล้วแสดง tree
   `Emoji + filename.md` ใต้ phase
@@ -288,10 +288,13 @@ AI ตัวอื่นอ่านแล้วเข้าใจได้เ�
 - ระหว่างอ่าน Markdown ใช้ Focus mode: workflow ด้านหลังเหลือ opacity 16%,
   active card ชัดเต็ม, กองเก่าจางลง และคืน workflow เป็น 100% ตอน collapse;
   INVESTIGATE lane โฟกัส Business / Technical พร้อมกันสองใบ
+- ด่านรับเรื่องแสดงหัว `📥 รับเรื่อง` และ subtitle `อ่านและจัดรูปข้อมูล`
+  ใน Beats 2–9 โดยวางหัว การ์ด และ working-set label ที่แนวเดียวกับด่านอื่น
+  แล้วซ่อนหัวเมื่อยุบเข้า checkpoint ที่ Beat 10
 - `INVESTIGATE` fan-out Business / Technical และมี technical Markdown แยกจริง
   สำหรับ structure, web, API, database, logs และ code
-- Beat map: 1–10 INTAKE, 11–20 TRIAGE, 21–33 INVESTIGATE, 34–43 SYNTHESIZE,
-  44–54 OWNERSHIP, 55–68 DISPATCH, 69 overview, 70 finish
+- Beat map: 1–10 รับเรื่อง, 11–20 แยกประเด็น, 21–33 ตรวจสอบ, 34–43 สรุปผล,
+  44–54 ระบุผู้รับผิดชอบ, 55–68 ส่งต่องาน, 69 overview, 70 finish
 - captions ทุก beatเป็นภาษาไทย; title ใน body ของทุกการ์ดมี Emoji
 - `PREV` ของสไลด์ 09 ชี้ `08-agent.html`; `NEXT` ยังว่าง;
   `08-agent.html` เชื่อม NEXT มาหน้านี้แล้ว

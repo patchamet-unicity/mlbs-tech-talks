@@ -2,32 +2,32 @@
 
 ## Status
 
-`09-inbox-to-ticket.html` ใช้โครง 70 beats ครบตั้งแต่ Opening / `INTAKE`
-ไปจนถึง `TRIAGE`, `INVESTIGATE`, `SYNTHESIZE`, `OWNERSHIP`,
-`DISPATCH` และ Final Result
+`09-inbox-to-ticket.html` ใช้โครง 70 beats ครบตั้งแต่ Opening / `รับเรื่อง`
+ไปจนถึง `แยกประเด็น`, `ตรวจสอบ`, `สรุปผล`, `ระบุผู้รับผิดชอบ`,
+`ส่งต่องาน` และ Final Result
 
 สไลด์นี้เป็นตัวอย่างงานจริงต่อจาก `08-agent.html`: ทุก phase ใช้ภาษาภาพเดียวกับ
-`INTAKE` คือเปิด Markdown ทีละใบ คงใบก่อนหน้าเป็นกอง รวมเป็น working set
+`รับเรื่อง` คือเปิด Markdown ทีละใบ คงใบก่อนหน้าเป็นกอง รวมเป็น working set
 แล้วยุบเข้า checkpoint บน route พร้อม tree รายชื่อไฟล์ที่ค้างอยู่ตลอด
 
 ## Current implementation — 70 beats
 
-- **Beats 1–10 — Opening + INTAKE**: เปิด route → แสดง Markdown 7 ใบทีละใบ →
-  รวมเป็น working set → ยุบเข้า `[INTAKE]`
-- **Beats 11–20 — TRIAGE**: แสดง Markdown 8 ใบทีละใบ → รวม → ยุบเข้า
-  `[TRIAGE]`
-- **Beats 21–33 — INVESTIGATE**: รับ `triaged-work-items.md` แล้ว fan-out เป็น
+- **Beats 1–10 — Opening + รับเรื่อง**: เปิด route → แสดง Markdown 7 ใบทีละใบ →
+  รวมเป็น working set → ยุบเข้า `[รับเรื่อง]`
+- **Beats 11–20 — แยกประเด็น**: แสดง Markdown 8 ใบทีละใบ → รวม → ยุบเข้า
+  `[แยกประเด็น]`
+- **Beats 21–33 — ตรวจสอบ**: รับ `triaged-work-items.md` แล้ว fan-out เป็น
   Business / Technical; แสดงเอกสารสองฝั่งเป็นคู่ ๆ ก่อนรวมผลและยุบเข้า
-  `[INVESTIGATE]`
+  `[ตรวจสอบ]`
 - Technical Evidence แตกเป็นไฟล์จริงระดับ `system-structure.md`,
   `web-check.md`, `api-check.md`, `database-check.md`, `log-check.md` และ
   `code-check.md` ไม่ใช้ไฟล์ umbrella ใบเดียว
-- **Beats 34–43 — SYNTHESIZE**: แสดง Markdown 8 ใบ → รวมหลักฐาน ประเมิน
-  confidence และล็อก scope → ยุบเข้า `[SYNTHESIZE]`
-- **Beats 44–54 — OWNERSHIP**: แสดง Markdown 9 ใบ → ระบุ owner, approver,
-  dependencies จาก confirmed scope → ยุบเข้า `[OWNERSHIP]`
-- **Beats 55–68 — DISPATCH**: แสดง Markdown 12 ใบ → เตรียม parent/child tickets,
-  human approval และ verify ticket set → ยุบเข้า `[DISPATCH]`
+- **Beats 34–43 — สรุปผล**: แสดง Markdown 8 ใบ → รวมหลักฐาน ประเมิน
+  confidence และล็อก scope → ยุบเข้า `[สรุปผล]`
+- **Beats 44–54 — ระบุผู้รับผิดชอบ**: แสดง Markdown 9 ใบ → ระบุ owner,
+  approver และ dependencies จาก confirmed scope → ยุบเข้า `[ระบุผู้รับผิดชอบ]`
+- **Beats 55–68 — ส่งต่องาน**: แสดง Markdown 12 ใบ → เตรียม parent/child
+  tickets, human approval และ verify ticket set → ยุบเข้า `[ส่งต่องาน]`
 - **Beats 69–70 — Final Result**: zoom out เห็น route และ tree ทั้งหก phase
   จากนั้นคนกับหุ่นเคลื่อนไปถึงเส้นชัย
 - tree ใต้ phase ที่เสร็จแล้วคงอยู่ใน world เสมอ; กล้องเลื่อนไปตาม phase ปัจจุบัน
@@ -35,6 +35,9 @@
 - ระหว่างเปิด Markdown ใช้ Focus mode: route และ tree ด้านหลังลดเหลือ 16%,
   active card ชัดเต็ม, การ์ดก่อนหน้าลดน้ำหนัก และ phase title ทำหน้าที่เป็น
   breadcrumb เหนือการ์ด; เมื่อยุบเข้า checkpoint จึงคืน workflow เป็น 100%
+- Beats 2–9 ของด่านรับเรื่องแสดงหัว `📥 รับเรื่อง` และคำอธิบาย
+  `อ่านและจัดรูปข้อมูล` ที่ตำแหน่งเดียวกับด่านอื่น พร้อมจัด deck และ working-set
+  label ให้ใช้แนวเดียวกัน แล้วซ่อนหัวเมื่อยุบใน Beat 10
 - ช่วง INVESTIGATE มอง Business / Technical เป็น focus group เดียว จึงมี active
   card สองใบพร้อมกัน ส่วนหัวสองกิ่งหายเมื่อ fan-in กลับมาที่ findings
 - caption ทุก beat เป็นภาษาไทย; title ใน body ของทุกการ์ดมี Emoji
