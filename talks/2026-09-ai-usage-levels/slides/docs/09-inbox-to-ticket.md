@@ -2,7 +2,7 @@
 
 ## Status
 
-`09-inbox-to-ticket.html` ใช้โครง 70 beats ครบตั้งแต่ Opening / `รับเรื่อง`
+`09-inbox-to-ticket.html` ใช้โครง 71 beats ครบตั้งแต่ Opening / `รับเรื่อง`
 ไปจนถึง `แยกประเด็น`, `ตรวจสอบ`, `สรุปผล`, `ระบุผู้รับผิดชอบ`,
 `ส่งต่องาน` และ Final Result
 
@@ -10,34 +10,41 @@
 `รับเรื่อง` คือเปิด Markdown ทีละใบ คงใบก่อนหน้าเป็นกอง รวมเป็น working set
 แล้วยุบเข้า checkpoint บน route พร้อม tree รายชื่อไฟล์ที่ค้างอยู่ตลอด
 
-## Current implementation — 70 beats
+## Current implementation — 71 beats
 
-- **Beats 1–10 — Opening + รับเรื่อง**: เปิด route → แสดง Markdown 7 ใบทีละใบ →
-  รวมเป็น working set → ยุบเข้า `[รับเรื่อง]`
-- **Beats 11–20 — แยกประเด็น**: แสดง Markdown 8 ใบทีละใบ → รวม → ยุบเข้า
+- **Beats 1–11 — Opening + รับเรื่อง**: เปิด route → แสดง Markdown 8 ใบทีละใบ →
+  รวมเป็น working set → ยุบเข้า `[รับเรื่อง]`; เนื้อหาครอบคลุมเฉพาะ
+  อ่าน คัดกรอง เก็บ และตรวจความครบถ้วน
+- **Beats 12–21 — แยกประเด็น**: แสดง Markdown 8 ใบทีละใบ → รวม → ยุบเข้า
   `[แยกประเด็น]`
-- **Beats 21–33 — ตรวจสอบ**: รับ `triaged-work-items.md` แล้ว fan-out เป็น
+- **Beats 22–34 — ตรวจสอบ**: รับ `triaged-work-items.md` แล้ว fan-out เป็น
   Business / Technical; แสดงเอกสารสองฝั่งเป็นคู่ ๆ ก่อนรวมผลและยุบเข้า
   `[ตรวจสอบ]`
 - Technical Evidence แตกเป็นไฟล์จริงระดับ `system-structure.md`,
   `web-check.md`, `api-check.md`, `database-check.md`, `log-check.md` และ
   `code-check.md` ไม่ใช้ไฟล์ umbrella ใบเดียว
-- **Beats 34–43 — สรุปผล**: แสดง Markdown 8 ใบ → รวมหลักฐาน ประเมิน
+- **Beats 35–44 — สรุปผล**: แสดง Markdown 8 ใบ → รวมหลักฐาน ประเมิน
   confidence และล็อก scope → ยุบเข้า `[สรุปผล]`
-- **Beats 44–54 — ระบุผู้รับผิดชอบ**: แสดง Markdown 9 ใบ → ระบุ owner,
+- **Beats 45–55 — ระบุผู้รับผิดชอบ**: แสดง Markdown 9 ใบ → ระบุ owner,
   approver และ dependencies จาก confirmed scope → ยุบเข้า `[ระบุผู้รับผิดชอบ]`
-- **Beats 55–68 — ส่งต่องาน**: แสดง Markdown 12 ใบ → เตรียม parent/child
+- **Beats 56–69 — ส่งต่องาน**: แสดง Markdown 12 ใบ → เตรียม parent/child
   tickets, human approval และ verify ticket set → ยุบเข้า `[ส่งต่องาน]`
-- **Beats 69–70 — Final Result**: zoom out เห็น route และ tree ทั้งหก phase
+- **Beats 70–71 — Final Result**: zoom out เห็น route และ tree ทั้งหก phase
   จากนั้นคนกับหุ่นเคลื่อนไปถึงเส้นชัย
 - tree ใต้ phase ที่เสร็จแล้วคงอยู่ใน world เสมอ; กล้องเลื่อนไปตาม phase ปัจจุบัน
   และกองการ์ดใหม่สามารถซ้อนบัง tree เก่าได้ตามจังหวะการเล่า
 - ระหว่างเปิด Markdown ใช้ Focus mode: route และ tree ด้านหลังลดเหลือ 16%,
   active card ชัดเต็ม, การ์ดก่อนหน้าลดน้ำหนัก และ phase title ทำหน้าที่เป็น
   breadcrumb เหนือการ์ด; เมื่อยุบเข้า checkpoint จึงคืน workflow เป็น 100%
-- Beats 2–9 ของด่านรับเรื่องแสดงหัว `📥 รับเรื่อง` และคำอธิบาย
-  `อ่านและจัดรูปข้อมูล` ที่ตำแหน่งเดียวกับด่านอื่น พร้อมจัด deck และ working-set
-  label ให้ใช้แนวเดียวกัน แล้วซ่อนหัวเมื่อยุบใน Beat 10
+- Beats 2–10 ของด่านรับเรื่องแสดงหัว `📥 รับเรื่อง` และคำอธิบาย
+  `อ่าน คัดกรอง และเก็บอีเมล` ที่ตำแหน่งเดียวกับด่านอื่น พร้อมจัด deck และ
+  working-set label ให้ใช้แนวเดียวกัน แล้วซ่อนหัวเมื่อยุบใน Beat 11
+- tree ของรับเรื่องแบ่งเป็นสี่กลุ่ม: อ่าน (`incoming-email.md`,
+  `email-source.md`, `email-reader.md`), คัดกรอง (`inbox-rules.md`,
+  `email-filter.md`), เก็บ (`email-storage.md`, `intake-record.md`)
+  และตรวจ (`intake-checks.md`)
+- รับเรื่องไม่มีการจำแนก Issue / Requirement และไม่มี Human clarification;
+  `intake-record.md` ส่งอีเมลที่เก็บครบให้ด่านแยกประเด็นตัดสินต่อ
 - ช่วง INVESTIGATE มอง Business / Technical เป็น focus group เดียว จึงมี active
   card สองใบพร้อมกัน ส่วนหัวสองกิ่งหายเมื่อ fan-in กลับมาที่ findings
 - caption ทุก beat เป็นภาษาไทย; title ใน body ของทุกการ์ดมี Emoji
@@ -49,12 +56,12 @@
 ### Verification ล่าสุด
 
 - inline JavaScript syntax และ `git diff --check` ผ่าน
-- headless Chrome ผ่านครบ 70 beats ที่ viewport 1280×720 รวม back, reset และ
+- headless Chrome ผ่านครบ 71 beats ที่ viewport 1280×720 รวม back, reset และ
   rapid navigation
 - ทุก milestone มีจำนวน persistent trees ถูกต้อง: 2 / 3 / 4 / 5 / 6
 - ไม่พบ active Markdown card ล้นกรอบ และ INVESTIGATE tree มีไฟล์ structure,
   web, API, database, logs และ code ครบ
-- Focus mode ผ่านครบ 70 beats: background dim/restore ถูกจังหวะ, breadcrumb
+- Focus mode ผ่านครบ 71 beats: background dim/restore ถูกจังหวะ, breadcrumb
   ไม่ทับ active card และ INVESTIGATE lane มี focus พร้อมกันสองใบ
 
 ## Working name
@@ -207,7 +214,7 @@ Context, Tools, Decision points, Human approval และการ Verify รอ
 
 ```text
 1. INTAKE
-   อ่านและจัดรูปข้อมูล
+   อ่าน คัดกรอง และเก็บอีเมล
 
 2. TRIAGE
    แตก Work Items และจำแนกประเภท
@@ -248,7 +255,7 @@ Context, Tools, Decision points, Human approval และการ Verify รอ
 Tree เต็มชุดใหญ่เกินกว่าจะเปิดพร้อมกันในหน้าเดียว ควรให้แกนหลักอยู่กลางเวทีแล้ว
 ค่อยแตกกิ่งตาม beat:
 
-1. `INTAKE` — เมลและ attachment เข้ามา
+1. `INTAKE` — อ่าน คัดกรอง และเก็บเมลกับ attachment โดยยังไม่จำแนกประเภทงาน
 2. `TRIAGE` — แตก request เป็น Work Items และจำแนกประเภท
 3. `INVESTIGATE` — แตกสองกิ่ง Business Context / Technical Evidence พร้อมกัน
 4. `SYNTHESIZE` — รวมผลกลับมา ยืนยันความเกี่ยวข้องและล็อก scope
@@ -265,5 +272,5 @@ Tree เต็มชุดใหญ่เกินกว่าจะเปิด
 - TRIAGE ใช้ Work Item A/B เพื่อสื่อว่าหนึ่ง request แตกได้หลายงาน โดยไม่ใส่
   รายละเอียดเคสจนแน่นเกินไป
 - Human approval ตรวจ Ticket plan ทั้งก้อนหนึ่งครั้งก่อนสร้างจริง
-- ใช้ 70 beats: ทุก phase อธิบายเอกสารทีละใบด้วย animation grammar เดียวกับ
+- ใช้ 71 beats: ทุก phase อธิบายเอกสารทีละใบด้วย animation grammar เดียวกับ
   INTAKE; INVESTIGATE เพิ่ม fan-out Business / Technical ภายใน grammar เดิม
