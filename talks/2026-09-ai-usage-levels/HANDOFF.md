@@ -5,7 +5,7 @@
 คิดหัวข้อ ✅ → outline ✅ → theme สี ✅ → ตัวละคร ✅ →
 **สไลด์ 1–6 ทำแล้ว ✅** → **Agent Harness intro 5 beats ทำแล้ว ✅**
 → **Agent Harness maze 8 beats ทำแล้ว ✅** →
-**Slide 09 Inbox-to-Ticket 71 beats ทำครบแล้ว ✅** → สรุป / หน้ารวม
+**Slide 09 Inbox-to-Ticket 70 beats ทำครบแล้ว ✅** → สรุป / หน้ารวม
 
 ## State
 
@@ -40,7 +40,7 @@ AI ตัวอื่นอ่านแล้วเข้าใจได้เ�
 | `slides/docs/06-context-files.md` | สไลด์ 6 ทั้ง 9 beats, mock context docs, tree transitions และข้อควรระวัง |
 | `slides/docs/07-agent.md` | Intro เข้า Agent Harness: ส่งพลัง สูบองค์ประกอบ และโคจรรอบหุ่น 5 beats |
 | `slides/docs/08-agent.md` | เขาวงกต 8 beats + Growth Intelligence workflow, outputs และ guardrails |
-| `slides/docs/09-inbox-to-ticket.md` | Inbox-to-Ticket workflow 6 phases / 71 beats + visual และ QA state |
+| `slides/docs/09-inbox-to-ticket.md` | Inbox-to-Ticket workflow 6 phases / 70 beats + visual และ QA state |
 
 ## สไลด์ที่ทำเสร็จแล้ว
 
@@ -273,7 +273,7 @@ AI ตัวอื่นอ่านแล้วเข้าใจได้เ�
 **คำถามที่ user ยังไม่ตอบ:** จะทำให้ปุ่มควบคุมหายไปเองเมื่อไม่ขยับเมาส์ 2 วิไหม
 (เพิ่มได้ทุกสไลด์ แต่ยังไม่ใช่งานรอบปัจจุบัน)
 
-## สไลด์ 09 — Inbox-to-Ticket Harness (71 beats, Intake revised 2026-09-13)
+## สไลด์ 09 — Inbox-to-Ticket Harness (70 beats, Triage revised 2026-09-13)
 
 ไฟล์งานคือ `slides/09-inbox-to-ticket.html` และเอกสารคู่กันคือ
 `slides/docs/09-inbox-to-ticket.md`
@@ -293,16 +293,19 @@ AI ตัวอื่นอ่านแล้วเข้าใจได้เ�
   เดียวกับด่านอื่น แล้วซ่อนหัวเมื่อยุบเข้า checkpoint ที่ Beat 11
 - tree ของรับเรื่องแบ่งเป็น อ่าน / คัดกรอง / เก็บ / ตรวจ; ไม่มีการจำแนก
   Issue / Requirement และไม่มี Human clarification ในด่านนี้
-- output ของรับเรื่องคือ `intake-record.md` ซึ่งเป็น input ใบแรกของด่าน
-  แยกประเด็น เพื่อคงการเชื่อมต่อระหว่างสองด่าน
+- output ของรับเรื่องคือ `intake-record.md`; ด่านแยกประเด็นรับช่วงต่อโดยไม่เปิด
+  การ์ดใบนี้ซ้ำ เพราะ tree ของด่านรับเรื่องยังค้างให้เห็นอยู่
+- ด่านแยกประเด็นมี Markdown 7 ใบ แบ่ง tree เป็น กติกา / แยกและจำแนก /
+  ผลลัพธ์ / ตรวจ และใช้ตัวอย่างหนึ่งอีเมลที่แตกเป็น Issue กับ Requirement
+  คนละ Work Item; ไม่มี Human clarification ก่อนถึงขั้นตรวจสอบ
 - `INVESTIGATE` fan-out Business / Technical และมี technical Markdown แยกจริง
   สำหรับ structure, web, API, database, logs และ code
-- Beat map: 1–11 รับเรื่อง, 12–21 แยกประเด็น, 22–34 ตรวจสอบ, 35–44 สรุปผล,
-  45–55 ระบุผู้รับผิดชอบ, 56–69 ส่งต่องาน, 70 overview, 71 finish
+- Beat map: 1–11 รับเรื่อง, 12–20 แยกประเด็น, 21–33 ตรวจสอบ, 34–43 สรุปผล,
+  44–54 ระบุผู้รับผิดชอบ, 55–68 ส่งต่องาน, 69 overview, 70 finish
 - captions ทุก beatเป็นภาษาไทย; title ใน body ของทุกการ์ดมี Emoji
 - `PREV` ของสไลด์ 09 ชี้ `08-agent.html`; `NEXT` ยังว่าง;
   `08-agent.html` เชื่อม NEXT มาหน้านี้แล้ว
-- ผ่าน headless Chrome ครบ 71 beats ที่ 1280×720, back/reset/rapid navigation,
+- ผ่าน headless Chrome ครบ 70 beats ที่ 1280×720, back/reset/rapid navigation,
   tree milestones และ card overflow checks แล้ว
 - user เปิดดู Focus mode เวอร์ชัน `?v=12` แล้วตอบว่า “เยี่ยม”; ถือว่า Slide 09
   ผ่านครบทั้งเนื้อหา animation และ visual hierarchy
