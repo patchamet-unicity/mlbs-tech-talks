@@ -14,6 +14,7 @@
 | [07-agent.md](07-agent.md) | `../07-agent.html` — Intro เข้า Agent Harness |
 | [08-agent.md](08-agent.md) | `../08-agent.html` — เขาวงกตก่อนและหลังมี Agent Harness |
 | [09-inbox-to-ticket.md](09-inbox-to-ticket.md) | `../09-inbox-to-ticket.html` — Inbox-to-Ticket Harness ครบ 6 phases / 70 beats |
+| [10-level-complete.md](10-level-complete.md) | `../10-level-complete.html` — หน้าปิด LEVEL COMPLETE / 3 beats |
 
 ## สิ่งที่ใช้ร่วมกันทุกสไลด์ (อ่านก่อน)
 

@@ -52,7 +52,7 @@
   card สองใบพร้อมกัน ส่วนหัวสองกิ่งหายเมื่อ fan-in กลับมาที่ findings
 - caption ทุก beat เป็นภาษาไทย; title ใน body ของทุกการ์ดมี Emoji
 - `PREV = "08-agent.html"`; สไลด์ 08 เชื่อม `NEXT = "09-inbox-to-ticket.html"`;
-  `NEXT` ของสไลด์ 09 ยังว่าง
+  `NEXT = "10-level-complete.html"`
 - รองรับ controls, AUTO, iframe postMessage, reduced motion และ rebuild state
   สำหรับ forward/back/reset ตามสไลด์ก่อนหน้า
 

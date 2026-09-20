@@ -5,7 +5,8 @@
 คิดหัวข้อ ✅ → outline ✅ → theme สี ✅ → ตัวละคร ✅ →
 **สไลด์ 1–6 ทำแล้ว ✅** → **Agent Harness intro 5 beats ทำแล้ว ✅**
 → **Agent Harness maze 8 beats ทำแล้ว ✅** →
-**Slide 09 Inbox-to-Ticket 70 beats ทำครบแล้ว ✅** → สรุป / หน้ารวม
+**Slide 09 Inbox-to-Ticket 70 beats ทำครบแล้ว ✅** →
+**Slide 10 LEVEL COMPLETE 3 beats ทำแล้ว ✅** → หน้ารวม
 
 ## State
 
@@ -41,6 +42,7 @@ AI ตัวอื่นอ่านแล้วเข้าใจได้เ�
 | `slides/docs/07-agent.md` | Intro เข้า Agent Harness: ส่งพลัง สูบองค์ประกอบ และโคจรรอบหุ่น 5 beats |
 | `slides/docs/08-agent.md` | เขาวงกต 8 beats + Growth Intelligence workflow, outputs และ guardrails |
 | `slides/docs/09-inbox-to-ticket.md` | Inbox-to-Ticket workflow 6 phases / 70 beats + visual และ QA state |
+| `slides/docs/10-level-complete.md` | หน้าปิด LEVEL COMPLETE 3 beats + callback และ QA state |
 
 ## สไลด์ที่ทำเสร็จแล้ว
 
@@ -303,8 +305,8 @@ AI ตัวอื่นอ่านแล้วเข้าใจได้เ�
 - Beat map: 1–11 รับเรื่อง, 12–20 แยกประเด็น, 21–33 ตรวจสอบ, 34–43 สรุปผล,
   44–54 ระบุผู้รับผิดชอบ, 55–68 ส่งต่องาน, 69 overview, 70 finish
 - captions ทุก beatเป็นภาษาไทย; title ใน body ของทุกการ์ดมี Emoji
-- `PREV` ของสไลด์ 09 ชี้ `08-agent.html`; `NEXT` ยังว่าง;
-  `08-agent.html` เชื่อม NEXT มาหน้านี้แล้ว
+- `PREV` ของสไลด์ 09 ชี้ `08-agent.html`; `NEXT` ชี้
+  `10-level-complete.html`; `08-agent.html` เชื่อม NEXT มาหน้านี้แล้ว
 - ผ่าน headless Chrome ครบ 70 beats ที่ 1280×720, back/reset/rapid navigation,
   tree milestones และ card overflow checks แล้ว
 - user เปิดดู Focus mode เวอร์ชัน `?v=12` แล้วตอบว่า “เยี่ยม”; ถือว่า Slide 09
@@ -312,10 +314,23 @@ AI ตัวอื่นอ่านแล้วเข้าใจได้เ�
 - อย่ากลับไปใช้ card grid หรือ diagram สรุปสาม beatต่อ phase; ทุก phase ต้องค่อย ๆ
   สร้างกอง Markdown แบบเดียวกับ INTAKE
 
+## สไลด์ 10 — LEVEL COMPLETE (3 beats, 2026-09-20)
+
+ไฟล์งานคือ `slides/10-level-complete.html` และเอกสารคู่กันคือ
+`slides/docs/10-level-complete.md`
+
+- Beat 1 ใช้กรอบ `LEVEL COMPLETE` และเส้นชัยเพื่อพักจังหวะหลัง Slide 09
+- Beat 2 callback บันได 4 ระดับจาก Slide 02; คนขึ้นขั้น 04 และหุ่นลอยข้างกัน
+- Beat 3 เปลี่ยนกรอบเป็นชื่อ talk กับคำถาม
+  `งานชิ้นไหนของคุณ พร้อมขยับขึ้นอีกหนึ่งระดับ?`; บันไดจางเป็นฉากหลังและ
+  `Q&A ▼` กะพริบ
+- ใช้ title frame จาก Slide 01, สัดส่วนบันไดจาก Slide 02 และ sprite เดิม
+- `PREV` ชี้ Slide 09; `NEXT` ว่างเพราะเป็นหน้าสุดท้าย
+- ผ่าน headless Chrome ครบ 3 beats ที่ 1280×720 รวม back/reset, overflow,
+  runtime และ visual screenshot checks
+
 ## Next action
 
-1. พักงานไว้ก่อนตามคำขอเดิมของ user
-2. เมื่อกลับมา ให้เริ่มจากคุยแนวคิดและภาพของ **สไลด์ปิด**; ยังไม่มีแบบที่ตกลงแล้ว
-   จึงห้ามเดาแล้วลงมือทำทันที
-3. หลังสไลด์ปิดผ่าน ค่อยเชื่อม `NEXT` จาก Slide 09 และพิจารณาหน้ารวม
-4. ทดสอบ iframe navigation ทั้งชุดเมื่อสร้างหน้ารวมแล้ว
+1. ให้ user เปิดดู Slide 10 และปรับจังหวะ/คำปิดตามการซ้อมพูด
+2. เมื่อ Slide 10 ผ่านแล้วจึง commit/push ชุดหน้าปิด
+3. พิจารณาสร้างหน้ารวม และทดสอบ iframe navigation ทั้งชุด
